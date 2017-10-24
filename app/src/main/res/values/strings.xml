@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Poe-alarm</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="chromatic_orb">Chromatic orb</string>
+    <string name="orb_of_alteration">Orb of Alteration</string>
+    <string name="jeweller_s_orb">Jeweller\'s orb</string>
+    <string name="blessed_orb">Blessed orb</string>
+    <string name="orb_of_chance">Orb of chance</string>
+    <string name="cartographer_s_chisel">Cartographer\'s chisel</string>
+    <string name="orb_of_fusing">Orb of Fusing</string>
+    <string name="orb_of_alchemy">Orb of alchemy</string>
+    <string name="orb_of_scouring">Orb of Scouring</string>
+    <string name="chaos_orb">Chaos orb</string>
+    <string name="orb_of_regret">Orb of regret</string>
+    <string name="regal_orb">Regal orb</string>
+    <string name="gemcutter_s_prism">Gemcutter\'s Prism</string>
+    <string name="divine_orb">Divine orb</string>
+    <string name="exalted_orb">Exalted orb</string>
+    <string name="eternal_orb">Eternal orb</string>
+    <string name="decoration_img_bottom">decoration img bottom</string>
+    <string name="select_currency">Select Currency</string>
+</resources>
