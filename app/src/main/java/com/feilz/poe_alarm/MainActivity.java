@@ -1,6 +1,8 @@
 package com.feilz.poe_alarm;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -13,9 +15,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+        int[][] testNums = {{1,2},{3,4},{5,6},{7,8},{9,10}};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +36,16 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
+        GraphView graph = (GraphView)findViewById(R.id.graph);
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[]{
+                new DataPoint(testNums[0][1],testNums[0][0]),
+                new DataPoint(testNums[1][1],testNums[1][0]),
+                new DataPoint(testNums[2][0],testNums[2][1]),
+                new DataPoint(testNums[3][1],testNums[3][0]),
+                new DataPoint(testNums[4][1],testNums[4][0]),
+        });
+        series.setColor(Color.WHITE);
+        graph.addSeries(series);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
