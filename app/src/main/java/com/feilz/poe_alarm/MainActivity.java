@@ -1,11 +1,17 @@
 package com.feilz.poe_alarm;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.text.Layout;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,17 +21,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-    int[][] testNums = {{1,2},{3,4},{5,6},{7,8},{9,10}};
+        implements NavigationView.OnNavigationItemSelectedListener, RewardedVideoAdListener {
+
     GraphView graph;
     Linegraph linegraph;
-    FloatingActionButton CurrencyIcon;
+    FloatingActionButton CurrencyIcon,loadtestVideoAd;
+    AdView adView;
+    private RewardedVideoAd mRewardedVideoAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +51,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         CurrencyIcon = (FloatingActionButton)findViewById(R.id.currencyIcon);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -55,7 +72,24 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
+        MobileAds.initialize(this,getString(R.string.banner_ad_unit_id));
+
+        adView = (AdView)findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().addTestDevice("C1FB146C50B90BC0745718D2C1E78156").build();
+        adView.loadAd(adRequest);
+
+        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardedVideoAd.setRewardedVideoAdListener(this);
+
+        loadtestVideoAd = (FloatingActionButton)findViewById(R.id.testButton);
+        loadtestVideoAd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadRewardedVideoAd();
+            }
+        });
     }
+
 
     @Override
     public void onBackPressed() {
@@ -65,6 +99,12 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+    }
+
+
+    private void loadRewardedVideoAd(){
+        mRewardedVideoAd.loadAd("ca-app-pub-3940256099942544/5224354917",
+                new AdRequest.Builder().addTestDevice("C1FB146C50B90BC0745718D2C1E78156").build());
     }
 
     @Override
@@ -166,4 +206,88 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+    @Override
+    public void onRewardedVideoAdLoaded() {
+        Toast.makeText(this, "onRewardedVideoAdLoaded", Toast.LENGTH_SHORT).show();
+        if (mRewardedVideoAd.isLoaded()){
+            mRewardedVideoAd.show();
+        }
+    }
+
+    @Override
+    public void onRewardedVideoAdOpened() {
+        Toast.makeText(this, "onRewardedVideoAdOpened", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRewardedVideoStarted() {
+        Toast.makeText(this, "onRewardedVideoStarted", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRewardedVideoAdClosed() {
+        Toast.makeText(this, "onRewardedVideoAdClosed", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRewarded(RewardItem rewardItem) {
+        Toast.makeText(this, "onRewarded!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRewardedVideoAdLeftApplication() {
+        Toast.makeText(this, "onRewardedVideoAdLeftApplication",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRewardedVideoAdFailedToLoad(int i) {
+        Toast.makeText(this, "onRewardedVideoAdFailedToLoad", Toast.LENGTH_SHORT).show();
+    }
+
+    /*
+    //Attempted to manually handle different screen sizes, didn't realize until about 5h later that
+    //constraintLayout actually does it by itself.... :(
+    //Leaving this here as a reminder to myself... read up on stuff better in advance.
+    public void initConfig(int orientation) {
+
+        // Log.d("getRight",Integer.toString(callingActivity.getWindow().getDecorView().getRight()));
+        // Log.d("getHeight",Integer.toString(callingActivity.getWindow().getDecorView().getHeight()));
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE){
+            screenHeight = this.getWindow().getDecorView().getBottom();
+            screenWidth = this.getWindow().getDecorView().getRight();
+            newH = screenHeight * 0.6;
+            newW = screenWidth * 0.8;
+            constSet.setVerticalBias(R.id.currencyIcon,(float) landscapeBias);
+        } else if (orientation == Configuration.ORIENTATION_PORTRAIT){
+            screenHeight = this.getWindow().getDecorView().getRight();
+            screenWidth = this.getWindow().getDecorView().getBottom();
+            newH = screenHeight / 2.2;
+            newW = screenHeight * 0.9;
+            constSet.setVerticalBias(R.id.currencyIcon,(float) portraitBias);
+        }
+        constSet.applyTo(mConstLayout);
+        linegraph.setGraphSize((int)newW,(int)newH);
+    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        //Log.d("getRight",Integer.toString(this.getWindow().getDecorView().getRight()));
+        //Log.d("getHeight",Integer.toString(this.getWindow().getDecorView().getHeight()));
+        // Checks the orientation of the screen
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            newH = screenHeight * 0.6;
+            newW = screenWidth * 0.8;
+            constSet.setVerticalBias(R.id.currencyIcon,(float) landscapeBias);
+        } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            newH = screenHeight / 2.2;
+            newW = screenHeight * 0.9;
+            constSet.setVerticalBias(R.id.currencyIcon,(float) portraitBias);
+        }
+        constSet.applyTo(mConstLayout);
+        linegraph.setGraphSize((int)newW,(int)newH);
+    }
+    */
 }

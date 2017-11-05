@@ -2,7 +2,11 @@ package com.feilz.poe_alarm;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.view.View;
+import android.support.constraint.ConstraintLayout;
+
+import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
@@ -27,11 +31,12 @@ class Linegraph  {
         this.callingActivity = activity;
         graph.setTitleColor(appTextColor);
         graph.setTitleTextSize(40);
+
+
         drawGraph(currency);
     }
 
     void update(String currency){
-
         drawGraph(currency);
     }
 
@@ -65,12 +70,28 @@ class Linegraph  {
         ser.setColor(color);
         ser.setThickness(2);
         ser.setDrawDataPoints(true);
+        ser.setDataPointsRadius(6);
         ser.setOnDataPointTapListener(new OnDataPointTapListener() {
             @Override
             public void onTap(Series series, DataPointInterface dataPoint) {
                 Toast.makeText(callingActivity,graph.getTitle(),Toast.LENGTH_SHORT).show();
             }
         });
-        ser.setDataPointsRadius(5);
+
     }
+        //Reasoning behind this is found at the bottom of mainactivity.
+      /*  void setGraphSize(int newWidth,int newHeight) {
+       // Log.d("getRight",Integer.toString(callingActivity.getWindow().getDecorView().getRight()));
+       // Log.d("getHeight",Integer.toString(callingActivity.getWindow().getDecorView().getHeight()));
+
+        ViewGroup.LayoutParams params = graph.getLayoutParams();
+        //Log.d("curW",Integer.toString(params.width));
+        //Log.d("curH",Integer.toString(params.height));
+        params.width=newWidth;
+        params.height=newHeight;
+        //Log.d("curW",Integer.toString(params.width));
+       // Log.d("curH",Integer.toString(params.height));
+        graph.setLayoutParams(params);
+
+    }*/
 }
