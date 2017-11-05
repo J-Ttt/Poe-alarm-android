@@ -34,7 +34,7 @@ public class Database extends SQLiteOpenHelper {
         data.put(DatabaseSQLStrings.columnNames.value,value);
         getWritableDatabase().insert(DatabaseSQLStrings.table_name,null,data);
     }
-    public Cursor readDatabase(String currency){
+    Cursor readDatabase(String currency){
         String sqlQuery = "SELECT " + DatabaseSQLStrings.columnNames.timestamp + ", " +
                 DatabaseSQLStrings.columnNames.value + "FROM " + DatabaseSQLStrings.table_name +
                 " WHERE " + DatabaseSQLStrings.columnNames.currencies + " = " + currency;
