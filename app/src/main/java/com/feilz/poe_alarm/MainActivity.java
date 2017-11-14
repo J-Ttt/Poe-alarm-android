@@ -1,10 +1,14 @@
 package com.feilz.poe_alarm;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
@@ -22,6 +26,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -34,14 +39,22 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, RewardedVideoAdListener {
 
+    BackgroundService bgService;
+    boolean isBound = false;
     GraphView graph;
     Linegraph linegraph;
     FloatingActionButton CurrencyIcon,loadtestVideoAd;
     AdView adView;
     private RewardedVideoAd mRewardedVideoAd;
+    EditText myEditText;
+    Boolean ads = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,19 +86,24 @@ public class MainActivity extends AppCompatActivity
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
         MobileAds.initialize(this,getString(R.string.banner_ad_unit_id));
+        if (ads) {
+            adView = (AdView) findViewById(R.id.adView);
+            AdRequest adRequest = new AdRequest.Builder().addTestDevice("C1FB146C50B90BC0745718D2C1E78156").build();
+            adView.loadAd(adRequest);
 
-        adView = (AdView)findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().addTestDevice("C1FB146C50B90BC0745718D2C1E78156").build();
-        adView.loadAd(adRequest);
-
-        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
-        mRewardedVideoAd.setRewardedVideoAdListener(this);
+            mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+            mRewardedVideoAd.setRewardedVideoAdListener(this);
+        }
+        Intent i = new Intent(MainActivity.this, BackgroundService.class);
+        bindService(i,bgServiceConnection,Context.BIND_AUTO_CREATE);
 
         loadtestVideoAd = (FloatingActionButton)findViewById(R.id.testButton);
         loadtestVideoAd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadRewardedVideoAd();
+                //loadRewardedVideoAd();
+                Map<Date,Double> newData = bgService.newRandomData();
+                linegraph.update(newData);
             }
         });
     }
@@ -247,6 +265,19 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "onRewardedVideoAdFailedToLoad", Toast.LENGTH_SHORT).show();
     }
 
+    private ServiceConnection bgServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            BackgroundService.MyLocalBinder binder = (BackgroundService.MyLocalBinder) iBinder;
+            bgService = binder.getService();
+            isBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            isBound = false;
+        }
+    };
     /*
     //Attempted to manually handle different screen sizes, didn't realize until about 5h later that
     //constraintLayout actually does it by itself.... :(
