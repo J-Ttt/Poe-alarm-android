@@ -25,7 +25,7 @@ public class BackgroundService extends Service {
         Timestamp[] dates = new Timestamp[10];
         Map<Date,Double> returnval = new HashMap<Date, Double>();
         Log.i("service","started");
-        long offset = Timestamp.valueOf("2017-11-09 00:00:00").getTime();
+        long offset = Timestamp.valueOf("2017-10-09 00:00:00").getTime();
         long end = Timestamp.valueOf("2017-11-10 00:00:00").getTime();
         long diff = end-offset+1;
         for (int i=0;i<10;i++){

@@ -1,71 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <!-- REORDER based on Mikael's idea. Allow app to remember last checked item-->
+    <item
+        android:id="@+id/exalted_orb"
+        android:icon="@drawable/exalted"
+        android:title="@string/exalted_orb"
+        />
+    <item
+        android:id="@+id/chaos_orb"
+        android:icon="@drawable/chaos"
+        android:title="@string/chaos_orb"
+        />
+    <item
+        android:id="@+id/orb_of_fusing"
+        android:icon="@drawable/fusing"
+        android:title="@string/orb_of_fusing"
+        />
+    <item
+        android:id="@+id/orb_of_alchemy"
+        android:icon="@drawable/alchemy"
+        android:title="@string/orb_of_alchemy"
+        />
+    <item
+        android:id="@+id/cartographers_chisel"
+        android:icon="@drawable/chisel"
+        android:title="@string/cartographer_s_chisel"
+        />
     <group>
         <item
-            android:id="@+id/chromatic_orb"
-            android:icon="@drawable/chromatic"
-            android:title="@string/chromatic_orb"
+            android:id="@+id/orb_of_regret"
+            android:icon="@drawable/regret"
+            android:title="@string/orb_of_regret"
             />
-        <item
-            android:id="@+id/orb_of_alteration"
-            android:icon="@drawable/alteration"
-            android:title="@string/orb_of_alteration"
-            />
-        <item
-            android:id="@+id/jewellers_orb"
-            android:icon="@drawable/jewellers"
-            android:title="@string/jeweller_s_orb"
-            />
-        <item
-            android:id="@+id/blessed_orb"
-            android:icon="@drawable/blessed"
-            android:title="@string/blessed_orb"
-            />
-        <item
-            android:id="@+id/orb_of_chance"
-            android:icon="@drawable/chance"
-            android:title="@string/orb_of_chance"
-            />
-        <item
-            android:id="@+id/cartographers_chisel"
-            android:icon="@drawable/chisel"
-            android:title="@string/cartographer_s_chisel"
-            />
-        <item
-            android:id="@+id/orb_of_fusing"
-            android:icon="@drawable/fusing"
-            android:title="@string/orb_of_fusing"
-            />
-        <item
-            android:id="@+id/orb_of_alchemy"
-            android:icon="@drawable/alchemy"
-            android:title="@string/orb_of_alchemy"
-            />
+
         <item
             android:id="@+id/orb_of_scouring"
             android:icon="@drawable/scouring"
             android:title="@string/orb_of_scouring"
             />
         <item
-            android:id="@+id/chaos_orb"
-            android:icon="@drawable/chaos"
-            android:title="@string/chaos_orb"
+            android:id="@+id/vaal_orb"
+            android:icon="@drawable/vaal"
+            android:title="@string/vaal_orb"
+            />
+    </group>
+    <item
+        android:id="@+id/chromatic_orb"
+        android:icon="@drawable/chromatic"
+        android:title="@string/chromatic_orb"
+        />
+    <group>
+        <item
+            android:id="@+id/jewellers_orb"
+            android:icon="@drawable/jewellers"
+            android:title="@string/jeweller_s_orb"
             />
         <item
-            android:id="@+id/orb_of_regret"
-            android:icon="@drawable/regret"
-            android:title="@string/orb_of_regret"
+            android:id="@+id/silver_coin"
+            android:icon="@drawable/silver"
+            android:title="@string/silver_coin"
             />
         <item
-            android:id="@+id/regal_orb"
-            android:icon="@drawable/regal"
-            android:title="@string/regal_orb"
-            />
-        <item
-            android:id="@+id/gemcutter_prism"
-            android:icon="@drawable/gcp"
-            android:title="@string/gemcutter_s_prism"
+            android:id="@+id/mirror_of_kalandra"
+            android:icon="@drawable/mirror"
+            android:title="@string/mirror_of_kalandra"
             />
         <item
             android:id="@+id/divine_orb"
@@ -73,15 +71,88 @@
             android:title="@string/divine_orb"
             />
         <item
-            android:id="@+id/exalted_orb"
-            android:icon="@drawable/exalted"
-            android:title="@string/exalted_orb"
+            android:id="@+id/orb_of_transmutation"
+            android:icon="@drawable/transmutation"
+            android:title="@string/orb_of_transmutation"
             />
         <item
-            android:id="@+id/eternal_orb"
-            android:icon="@drawable/eternal"
-            android:title="@string/eternal_orb"
+            android:id="@+id/orb_of_alteration"
+            android:icon="@drawable/alteration"
+            android:title="@string/orb_of_alteration"
             />
-
+    </group>
+    <item
+        android:id="@+id/gemcutter_prism"
+        android:icon="@drawable/gcp"
+        android:title="@string/gemcutter_s_prism"
+        />
+    <item
+        android:id="@+id/orb_of_chance"
+        android:icon="@drawable/chance"
+        android:title="@string/orb_of_chance"
+        />
+    <group>
+        <item
+            android:id="@+id/blessed_orb"
+            android:icon="@drawable/blessed"
+            android:title="@string/blessed_orb"
+            />
+        <item
+            android:id="@+id/regal_orb"
+            android:icon="@drawable/regal"
+            android:title="@string/regal_orb"
+            />
+        <item
+            android:id="@+id/orb_of_augmentation"
+            android:icon="@drawable/augmentation"
+            android:title="@string/orb_of_augmentation"
+            />
+    </group>
+    <item
+        android:id="@+id/eternal_orb"
+        android:icon="@drawable/eternal"
+        android:title="@string/eternal_orb"
+        />
+    <item
+        android:id="@+id/appr_cartographer"
+        android:icon="@drawable/apprcarto"
+        android:title="@string/apprentice_cartographer_s_sextant"
+        />
+    <item
+        android:id="@+id/journeyman_cartographer"
+        android:icon="@drawable/journeycarto"
+        android:title="@string/journeyman_cartographer_s_sextant"
+        />
+    <item
+        android:id="@+id/master_cartographer"
+        android:icon="@drawable/mastercarto"
+        android:title="@string/master_cartographer_s_sextant"
+        />
+    <group>
+        <item
+            android:id="@+id/blacksmiths_whetstone"
+            android:icon="@drawable/whetstone"
+            android:title="@string/blacksmith_s_whetstone"
+            />
+        <item
+            android:id="@+id/armourer_scrap"
+            android:icon="@drawable/armourer"
+            android:title="@string/armourer_s_scrap"
+            />
+        <item
+            android:id="@+id/glassblower_bauble"
+            android:icon="@drawable/glassblower"
+            android:title="@string/glassblower_s_bauble"
+            />
+        <item
+            android:id="@+id/scroll_of_wisdom"
+            android:icon="@drawable/scrollwisdom"
+            android:title="@string/scroll_of_wisdom"
+            />
+        <item
+            android:id="@+id/scroll_of_portal"
+            android:icon="@drawable/scrollportal"
+            android:title="@string/scroll_of_portal"
+            />
     </group>
 </menu>

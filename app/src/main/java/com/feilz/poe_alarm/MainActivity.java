@@ -5,8 +5,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.ContactsContract;
@@ -27,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -39,6 +42,8 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import org.w3c.dom.Text;
+
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Map;
@@ -47,6 +52,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, RewardedVideoAdListener {
 
     BackgroundService bgService;
+    private final static String prefs = "poe-alarm-prefs";
+    private final static String currCurrency="currCurrency";
+    public String currency;
     boolean isBound = false;
     GraphView graph;
     Linegraph linegraph;
@@ -55,6 +63,7 @@ public class MainActivity extends AppCompatActivity
     private RewardedVideoAd mRewardedVideoAd;
     EditText myEditText;
     Boolean ads = false;
+    TextView minVal,maxVal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,15 +71,15 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        CurrencyIcon = (FloatingActionButton)findViewById(R.id.currencyIcon);
-
-
+        minVal = (TextView)findViewById(R.id.minVal);
+        maxVal = (TextView)findViewById(R.id.maxVal);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        CurrencyIcon = (FloatingActionButton)findViewById(R.id.currencyIcon);
         CurrencyIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,11 +89,17 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+
+        SharedPreferences settings = getSharedPreferences(prefs,0);
+        currency = settings.getString(currCurrency,getString(R.string.chaos_orb));
+
         graph = (GraphView)findViewById(R.id.graph);
-        linegraph = new Linegraph(graph,getString(R.string.chaos_orb),getResources().getColor(R.color.colorText),this);
+        linegraph = new Linegraph(graph,currency,getResources().getColor(R.color.colorText),this,minVal,maxVal);
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
+
         MobileAds.initialize(this,getString(R.string.banner_ad_unit_id));
         if (ads) {
             adView = (AdView) findViewById(R.id.adView);
@@ -106,7 +121,9 @@ public class MainActivity extends AppCompatActivity
                 linegraph.update(newData);
             }
         });
+
     }
+
 
 
     @Override
@@ -117,6 +134,27 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+    }
+    //still need to check the data in the graph on start
+    @Override
+    protected void onStart(){
+        super.onStart();
+        linegraph.update(currency);
+
+    }
+    protected void onResume(){
+        super.onResume();
+        /* Don't yet know where exactly to put this.
+        Map<Date,Double> newData = bgService.newRandomData();
+        linegraph.update(newData);*/
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
+        SharedPreferences settings = getSharedPreferences(prefs,0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(currCurrency,currency);
+        editor.apply();
     }
 
 
@@ -155,74 +193,104 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.blessed_orb:
-                linegraph.update(getString(R.string.blessed_orb));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.blessed));
+                newSelection(getString(R.string.blessed_orb),getDrawable(R.drawable.blessed));
                 break;
             case R.id.orb_of_alchemy:
-                linegraph.update(getString(R.string.orb_of_alchemy));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.alchemy));
+                newSelection(getString(R.string.orb_of_alchemy),getDrawable(R.drawable.alchemy));
                 break;
             case R.id.orb_of_alteration:
-                linegraph.update(getString(R.string.orb_of_alteration));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.alteration));
+                newSelection(getString(R.string.orb_of_alteration),getDrawable(R.drawable.alteration));
                 break;
             case R.id.chaos_orb:
-                linegraph.update(getString(R.string.chaos_orb));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.chaos));
+                newSelection(getString(R.string.chaos_orb),getDrawable(R.drawable.chaos));
                 break;
             case R.id.orb_of_chance:
-                linegraph.update(getString(R.string.orb_of_chance));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.chance));
+                newSelection(getString(R.string.orb_of_chance),getDrawable(R.drawable.chance));
                 break;
             case R.id.cartographers_chisel:
-                linegraph.update(getString(R.string.cartographer_s_chisel));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.chisel));
+                newSelection(getString(R.string.cartographer_s_chisel),getDrawable(R.drawable.chisel));
                 break;
             case R.id.divine_orb:
-                linegraph.update(getString(R.string.divine_orb));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.divine));
+                newSelection(getString(R.string.divine_orb),getDrawable(R.drawable.divine));
                 break;
             case R.id.exalted_orb:
-                linegraph.update(getString(R.string.exalted_orb));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.exalted));
+                newSelection(getString(R.string.exalted_orb),getDrawable(R.drawable.exalted));
                 break;
             case R.id.orb_of_fusing:
-                linegraph.update(getString(R.string.orb_of_fusing));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.fusing));
+                newSelection(getString(R.string.orb_of_fusing),getDrawable(R.drawable.fusing));
                 break;
             case R.id.gemcutter_prism:
-                linegraph.update(getString(R.string.gemcutter_s_prism));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.gcp));
+                newSelection(getString(R.string.gemcutter_s_prism),getDrawable(R.drawable.gcp));
                 break;
             case R.id.jewellers_orb:
-                linegraph.update(getString(R.string.jeweller_s_orb));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.jewellers));
+                newSelection(getString(R.string.jeweller_s_orb),getDrawable(R.drawable.jewellers));
                 break;
             case R.id.regal_orb:
-                linegraph.update(getString(R.string.regal_orb));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.regal));
+                newSelection(getString(R.string.regal_orb),getDrawable(R.drawable.regal));
                 break;
             case R.id.orb_of_regret:
-                linegraph.update(getString(R.string.orb_of_regret));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.regret));
+                newSelection(getString(R.string.orb_of_regret),getDrawable(R.drawable.regret));
                 break;
             case R.id.orb_of_scouring:
-                linegraph.update(getString(R.string.orb_of_scouring));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.scouring));
+                newSelection(getString(R.string.orb_of_scouring),getDrawable(R.drawable.scouring));
                 break;
             case R.id.chromatic_orb:
-                linegraph.update(getString(R.string.chromatic_orb));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.chromatic));
+                newSelection(getString(R.string.chromatic_orb),getDrawable(R.drawable.chromatic));
                 break;
             case R.id.eternal_orb:
-                linegraph.update(getString(R.string.eternal_orb));
-                CurrencyIcon.setImageDrawable(getDrawable(R.drawable.eternal));
+                newSelection(getString(R.string.eternal_orb),getDrawable(R.drawable.eternal));
+                break;
+            case R.id.appr_cartographer:
+                newSelection(getString(R.string.apprentice_cartographer_s_sextant),getDrawable(R.drawable.apprcarto));
+                break;
+            case R.id.armourer_scrap:
+                newSelection(getString(R.string.armourer_s_scrap),getDrawable(R.drawable.armourer));
+                break;
+            case R.id.orb_of_augmentation:
+                newSelection(getString(R.string.orb_of_augmentation),getDrawable(R.drawable.augmentation));
+                break;
+            case R.id.glassblower_bauble:
+                newSelection(getString(R.string.glassblower_s_bauble),getDrawable(R.drawable.glassblower));
+                break;
+            case R.id.journeyman_cartographer:
+                newSelection(getString(R.string.journeyman_cartographer_s_sextant),getDrawable(R.drawable.journeycarto));
+                break;
+            case R.id.master_cartographer:
+                newSelection(getString(R.string.master_cartographer_s_sextant),getDrawable(R.drawable.mastercarto));
+                break;
+            case R.id.mirror_of_kalandra:
+                newSelection(getString(R.string.mirror_of_kalandra),getDrawable(R.drawable.mirror));
+                break;
+            case R.id.scroll_of_portal:
+                newSelection(getString(R.string.scroll_of_portal),getDrawable(R.drawable.scrollportal));
+                break;
+            case R.id.scroll_of_wisdom:
+                newSelection(getString(R.string.scroll_of_wisdom),getDrawable(R.drawable.scrollwisdom));
+                break;
+            case R.id.silver_coin:
+                newSelection(getString(R.string.silver_coin),getDrawable(R.drawable.silver));
+                break;
+            case R.id.orb_of_transmutation:
+                newSelection(getString(R.string.orb_of_transmutation),getDrawable(R.drawable.transmutation));
+                break;
+            case R.id.vaal_orb:
+                newSelection(getString(R.string.vaal_orb),getDrawable(R.drawable.vaal));
+                break;
+            case R.id.blacksmiths_whetstone:
+                newSelection(getString(R.string.blacksmith_s_whetstone),getDrawable(R.drawable.whetstone));
                 break;
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    void newSelection(String curr, Drawable drawable){
+        currency = curr;
+        linegraph.update(currency);
+        Map<Date,Double> newData = bgService.newRandomData();
+        linegraph.update(newData);
+        CurrencyIcon.setImageDrawable(drawable);
     }
 
 

@@ -1,6 +1,7 @@
 package com.feilz.poe_alarm;
 
 import android.app.Activity;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jjoe64.graphview.GraphView;
@@ -10,6 +11,8 @@ import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.jjoe64.graphview.series.OnDataPointTapListener;
 import com.jjoe64.graphview.series.Series;
+
+import org.w3c.dom.Text;
 
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
@@ -28,11 +31,15 @@ class Linegraph  {
     private String defaultCurrency;
     private int color;
     private Activity callingActivity;
-    Linegraph(GraphView graph, String currency, int appTextColor, Activity activity){
+    private TextView minVal,maxVal;
+
+    Linegraph(GraphView graph, String currency, int appTextColor, Activity activity, TextView minVal, TextView maxVal){
         this.graph = graph;
         this.defaultCurrency = currency;
         this.color = appTextColor;
         this.callingActivity = activity;
+        this.minVal=minVal;
+        this.maxVal=maxVal;
         graph.setTitleColor(appTextColor);
         graph.setTitleTextSize(40);
 
@@ -55,7 +62,7 @@ class Linegraph  {
         LineGraphSeries<DataPoint> ser = new LineGraphSeries<>(data(map));
         setSeriesSettings(ser);
         graph.getViewport().setMaxX(Timestamp.valueOf("2017-11-10 00:00:00").getTime());
-        graph.getViewport().setMinX(Timestamp.valueOf("2017-11-09 00:00:00").getTime());
+        graph.getViewport().setMinX(Timestamp.valueOf("2017-10-09 00:00:00").getTime());
         graph.addSeries(ser);
     }
 
@@ -75,7 +82,7 @@ class Linegraph  {
                 e.printStackTrace();
             }
 
-            DataPoint d = new DataPoint(m,nn);
+            DataPoint d = new DataPoint(dd,nn);
             values[i]=(d);
             i+=1;
         }
@@ -88,12 +95,19 @@ class Linegraph  {
         ser.setThickness(2);
         ser.setDrawDataPoints(true);
         ser.setDataPointsRadius(6);
+        setNewMaxMin(ser.getHighestValueY(),ser.getLowestValueY());
         ser.setOnDataPointTapListener(new OnDataPointTapListener() {
             @Override
             public void onTap(Series series, DataPointInterface dataPoint) {
-                Toast.makeText(callingActivity,"max: " + Double.toString(series.getHighestValueY()) + " min: "+ Double.toString(series.getLowestValueY()),Toast.LENGTH_SHORT).show();
+                Toast.makeText(callingActivity,"Value: " + Double.toString(dataPoint.getY()),Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    private void setNewMaxMin(Double max, Double min){
+        String newMax = "Max: " + Double.toString(max);
+        maxVal.setText(newMax);
+        String newMin = "Min: "+ Double.toString(min);
+        maxVal.setText(newMin);
     }
         //Reasoning behind this is found at the bottom of mainactivity.
       /*  void setGraphSize(int newWidth,int newHeight) {

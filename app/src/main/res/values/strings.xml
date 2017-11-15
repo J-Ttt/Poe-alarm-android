@@ -24,5 +24,19 @@
     <string name="decoration_img_bottom">decoration img bottom</string>
     <string name="select_currency">Select Currency</string>
     <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="vaal_orb">Vaal Orb</string>
+    <string name="silver_coin">Silver Coin</string>
+    <string name="mirror_of_kalandra">Mirror of Kalandra</string>
+    <string name="orb_of_transmutation">Orb of Transmutation</string>
+    <string name="orb_of_augmentation">Orb of Augmentation</string>
+    <string name="blacksmith_s_whetstone">Blacksmith\'s Whetstone</string>
+    <string name="armourer_s_scrap">Armourer\'s Scrap</string>
+    <string name="glassblower_s_bauble">Glassblower\'s Bauble</string>
+    <string name="scroll_of_wisdom">Scroll of Wisdom</string>
+    <string name="scroll_of_portal">Scroll of Portal</string>
+    <string name="apprentice_cartographer_s_sextant">Apprentice Cartographer\'s Sextant</string>
+    <string name="master_cartographer_s_sextant">Master Cartographer\'s Sextant</string>
+    <string name="journeyman_cartographer_s_sextant">Journeyman Cartographer\'s Sextant</string>
+    <string name="max">Max:</string>
 
 </resources>
