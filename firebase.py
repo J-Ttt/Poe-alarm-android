@@ -2,10 +2,17 @@ import pyrebase
 import json
 import requests
 import time
-from threading import Thread, RLock
+from threading import Thread, RLock, Event
+
+
+
+
 
 
 values = {}
+exit = Event()
+
+
 def authData():
     data = open("auths.json")
     jdata = json.load(data)
@@ -41,11 +48,12 @@ def getPrice(note):
                 return (int(numerator)/int(denominator), note[-1])
     return None
 
-def saver():
+def saver(exit):
     print("Saver on")
     global values
-    while 1:
-        name = "{}_poe.json".format(time.strftime("%d.%m.%Y_%H:%M:%S"))
+    while not exit.is_set():
+        name = "{}_poe.json".format(time.strftime("%d-%m-%Y_%H-%M-%S"))
+        print("wrote to file")
         with open(name, 'w') as fp:
             json.dump(values, fp)
         lock.acquire()
@@ -53,7 +61,9 @@ def saver():
             values = empty()
         finally:
             lock.release()
-        time.sleep(3600)
+
+        exit.wait(3600)
+    print("saver dead")
 
 def empty():
     values = {
@@ -426,8 +436,8 @@ converted = {
 
 }
 lock = RLock()
-def main():
-    numb = "109019874-114329213-107281917-123618169-115619434"
+def main(exit):
+    numb = "109046044-114348493-107307633-123646289-115642409"
     id = "?id=" + numb
     sites = 0
     stashes = 0
@@ -438,7 +448,7 @@ def main():
 
 
 
-    while 1:
+    while not exit.is_set():
         try:
             resp = requests.get("http://api.pathofexile.com/public-stash-tabs" + id)
             print("got some")
@@ -479,8 +489,13 @@ def main():
 
 if __name__ == "__main__":
     values = empty()
-    t = Thread(target=main)
-    time.sleep(2)
-    t2 = Thread(target=saver)
+    t = Thread(target=main,  args=(exit,))
+    t2 = Thread(target=saver,  args=(exit,))
     t.start()
     t2.start()
+    while 1:
+        try:
+            time.sleep(1)
+        except KeyboardInterrupt:
+            exit.set()
+            break
