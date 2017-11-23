@@ -4,6 +4,7 @@ import requests
 import time
 from threading import Thread, RLock, Event
 import numpy as np
+from copy import deepcopy
 
 
 
@@ -54,16 +55,24 @@ def saver(exit):
     print("Saver on")
     global values
     while not exit.is_set():
-        name = "{}_poe.json".format(time.strftime("%d-%m-%Y_%H-%M-%S"))
-        print("wrote to file")
-        with open(name, 'w') as fp:
-            json.dump(values, fp)
-        lock.acquire()
-        try:
-            values = empty()
-        finally:
-            lock.release()
-
+        if not exit.is_set():
+            date = time.strftime("%d-%m-%Y")
+            timestamp = time.strftime("%H-%M-%S")
+            name = "{}_poe.json".format(time.strftime("%d-%m-%Y_%H-%M-%S"))
+            print("Send to firebase")
+            """with open(name, 'w') as fp:
+                json.dump(values, fp)"""
+            kopio = deepcopy(values)
+            lock.acquire()
+            try:
+                values = empty()
+            finally:
+                lock.release()
+            firebase = configure()
+            db = firebase.database()
+            avr = avarages(kopio)
+            for league in avr:
+                db.child(league).child(date).child(timestamp).set(avr[league])
         exit.wait(3600)
     print("saver dead")
 
@@ -81,41 +90,41 @@ def empty():
                 'jew' : []
     }
     everything = {
-        "Orb of Alteration" : curs.copy(),
-        "Orb of Fusing" : curs.copy(),
-        "Orb of Alchemy" : curs.copy(),
-        "Chaos Orb" : curs.copy(),
-        "Gemcutter's Prism" : curs.copy(),
-        "Exalted Orb" : curs.copy(),
-        "Chromatic Orb" : curs.copy(),
-        "Jeweller's Orb" : curs.copy(),
-        "Orb of Chance" : curs.copy(),
-        "Cartographer's Chisel" : curs.copy(),
-        "Orb of Scouring" : curs.copy(),
-        "Blessed Orb" : curs.copy(),
-        "Orb of Regret" : curs.copy(),
-        "Regal Orb" : curs.copy(),
-        "Divine Orb" : curs.copy(),
-        "Vaal Orb" : curs.copy(),
-        "Orb of Augmentation" : curs.copy(),
-        "Eternal Orb" : curs.copy(),
-        "Scroll of Wisdom" : curs.copy(),
-        "Scroll of Portal" : curs.copy(),
-        "Mirror of Kalandra" : curs.copy(),
-        "Silver Coin" : curs.copy(),
-        "Blacksmith's Whetstone" : curs.copy(),
-        "Armourer's Scrap" : curs.copy(),
-        "Glassblower's Bauble" : curs.copy(),
-        "Orb of transmutation" : curs.copy(),
-        "Apprentice Cartographer's Sextant" : curs.copy(),
-        "Journeyman Cartographer's Sextant" : curs.copy(),
-        "Master Cartographer's Sextant" : curs.copy()
+        "Orb of Alteration" : deepcopy(curs),
+        "Orb of Fusing" : deepcopy(curs),
+        "Orb of Alchemy" : deepcopy(curs),
+        "Chaos Orb" : deepcopy(curs),
+        "Gemcutter's Prism" : deepcopy(curs),
+        "Exalted Orb" : deepcopy(curs),
+        "Chromatic Orb" : deepcopy(curs),
+        "Jeweller's Orb" : deepcopy(curs),
+        "Orb of Chance" : deepcopy(curs),
+        "Cartographer's Chisel" : deepcopy(curs),
+        "Orb of Scouring" : deepcopy(curs),
+        "Blessed Orb" : deepcopy(curs),
+        "Orb of Regret" : deepcopy(curs),
+        "Regal Orb" : deepcopy(curs),
+        "Divine Orb" : deepcopy(curs),
+        "Vaal Orb" : deepcopy(curs),
+        "Orb of Augmentation" : deepcopy(curs),
+        "Eternal Orb" : deepcopy(curs),
+        "Scroll of Wisdom" : deepcopy(curs),
+        "Scroll of Portal" : deepcopy(curs),
+        "Mirror of Kalandra" : deepcopy(curs),
+        "Silver Coin" : deepcopy(curs),
+        "Blacksmith's Whetstone" : deepcopy(curs),
+        "Armourer's Scrap" : deepcopy(curs),
+        "Glassblower's Bauble" : deepcopy(curs),
+        "Orb of transmutation" : deepcopy(curs),
+        "Apprentice Cartographer's Sextant" : deepcopy(curs),
+        "Journeyman Cartographer's Sextant" : deepcopy(curs),
+        "Master Cartographer's Sextant" : deepcopy(curs)
 
     }
     leagues = ["Standard", "Hardcore", "SSF Harbinger HC", "Hardcore Harbinger", "SSF Harbinger", "Harbinger"]
     finale = {}
     for name in leagues:
-        finale[name] = everything.copy()
+        finale[name] = deepcopy(everything)
     return finale
 
 
@@ -136,7 +145,8 @@ converted = {
 }
 lock = RLock()
 def main(exit):
-    numb = "109120935-114428894-107376749-123741778-115720700"
+    print("Reader on")
+    numb = "109154211-114468003-107409049-123780778-115758843"
     id = "?id=" + numb
     sites = 0
     stashes = 0
@@ -150,14 +160,15 @@ def main(exit):
     while not exit.is_set():
         try:
             resp = requests.get("http://api.pathofexile.com/public-stash-tabs" + id)
-            print("got some")
+            #print("got some")
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             print("ERROR OCCURED REQUESTING THE SITE, TRYING AGAIN IN 2 SECONDS")
-            time.sleep(2)
+            exit.wait(2)
             continue
         data = json.loads(resp.text)
         if not "next_change_id" in data.keys():
             print("HIT ROCK BOTTOM, TRYING AGAIN")
+            exit.wait(2)
             continue
         stashes += len(data["stashes"])
         for stash in data["stashes"]:
@@ -179,17 +190,22 @@ def main(exit):
                                 continue
                             finally:
                                 lock.release()
-                            print("{} is prized at {} {}".format(item["typeLine"], price[0], price[1]))
+                            #print("{} is prized at {} {}".format(item["typeLine"], price[0], price[1]))
 
 
         id = "?id=" + data["next_change_id"]
         sites += 1
 
-
-        print(data["next_change_id"])
-        print("Stashes {}".format(len(data["stashes"])))
-        timeR = time.time() - timeS
-        print("Pages visited {}\nStashes mined: {}\nTime run: {}\n".format(sites, stashes, timeR))
+        if sites % 100 == 0:
+            timeR = time.time() - timeS
+            for i in values:
+                print("{}:".format(i))
+                for item in values[i]:
+                    print("\t{}: {}".format(item, values[i][item]["times"]))
+            print(data["next_change_id"])
+            print("Stashes {}".format(len(data["stashes"])))
+            print("Pages visited {}\nStashes mined: {}\nTime run: {}\n".format(sites, stashes, timeR))
+    print("reader dead")
 
 def findleague(exit):
     numb = "109116329-114424267-107372105-123736579-115715272"
@@ -220,6 +236,7 @@ def findleague(exit):
         stashes += len(data["stashes"])
         id = "?id=" + data["next_change_id"]
         sites += 1
+
         print(data["next_change_id"])
         print("Stashes {}".format(len(data["stashes"])))
         for i in leagues:
@@ -228,9 +245,13 @@ def findleague(exit):
 
 def avarages(data):
     avrg = {}
+
     for league in data:
         avrg[league] = {}
         for item in data[league]:
+            if item == "Chaos Orb":
+                avrg[league][item] = (1, len(data[league][item]["chaos"]))
+
             chaos = data[league][item]["chaos"]
             chaos = np.array(chaos)
             if len(chaos) != 0:
@@ -238,12 +259,14 @@ def avarages(data):
                 std = np.std(chaos)
             else:
                 mean = 0
-            if mean == 0:
-                avrg[league][item] = mean
+                avrg[league][item] = (mean, 0)
+
+            final = [x for x in chaos if (x > mean - 1.5 * std)]
+            final = [x for x in final if (x < mean + 1.5 * std)]
+            if len(final) != 0:
+                avrg[league][item] = (np.mean(np.array(final)), len(final))
             else:
-                final = [x for x in chaos if (x > mean - 1.5 * std)]
-                final = [x for x in final if (x < mean + 1.5 * std)]
-                avrg[league][item] = np.mean(np.array(final))
+                avrg[league][item] = (mean, 0)
 
     return avrg
 
@@ -252,7 +275,8 @@ def postData(data):
 
 if __name__ == "__main__":
 
-    """values = empty()
+    values = empty()
+
     t = Thread(target=main,  args=(exit,))
     t2 = Thread(target=saver,  args=(exit,))
     t.start()
@@ -262,11 +286,11 @@ if __name__ == "__main__":
             time.sleep(1)
         except KeyboardInterrupt:
             exit.set()
-            break"""
-    data = json.load(open("22-11-2017_16-56-33_poe.json", "r"))
+            break
+    """data = json.load(open("22-11-2017_16-56-33_poe.json", "r"))
     data = avarages(data)
     with open("tulokset.json", 'w') as fp:
         json.dump(data, fp)
     firebase = configure()
     db = firebase.database()
-    db.set({"Harbinger" : data["harbinger"]})
+    db.set({"Harbinger" : data["harbinger"]})"""
