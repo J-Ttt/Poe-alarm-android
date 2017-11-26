@@ -38,5 +38,43 @@
     <string name="master_cartographer_s_sextant">Master Cartographer\'s Sextant</string>
     <string name="journeyman_cartographer_s_sextant">Journeyman Cartographer\'s Sextant</string>
     <string name="max">Max:</string>
+    <string name="valInExaltedOrbs">Value in Exalted Orbs</string>
+    <string name="valInChaosOrbs">Value in Chaos Orbs</string>
+
+    <string-array name="all_currencies">
+        <item>@string/exalted_orb</item>
+        <item>@string/chaos_orb</item>
+        <item>@string/orb_of_fusing</item>
+        <item>@string/orb_of_alchemy</item>
+        <item>@string/cartographer_s_chisel</item>
+        <item>@string/orb_of_regret</item>
+        <item>@string/orb_of_scouring</item>
+        <item>@string/vaal_orb</item>
+        <item>@string/chromatic_orb</item>
+        <item>@string/jeweller_s_orb</item>
+        <item>@string/silver_coin</item>
+        <item>@string/mirror_of_kalandra</item>
+        <item>@string/divine_orb</item>
+        <item>@string/orb_of_transmutation</item>
+        <item>@string/exalted_orb</item>
+        <item>@string/orb_of_alteration</item>
+        <item>@string/gemcutter_s_prism</item>
+        <item>@string/blessed_orb</item>
+        <item>@string/regal_orb</item>
+        <item>@string/orb_of_augmentation</item>
+        <item>@string/eternal_orb</item>
+        <item>@string/apprentice_cartographer_s_sextant</item>
+        <item>@string/journeyman_cartographer_s_sextant</item>
+        <item>@string/master_cartographer_s_sextant</item>
+        <item>@string/blacksmith_s_whetstone</item>
+        <item>@string/armourer_s_scrap</item>
+        <item>@string/glassblower_s_bauble</item>
+        <item>@string/scroll_of_wisdom</item>
+        <item>@string/scroll_of_portal</item>
+    </string-array>
+    <string-array name="diff_array">
+        <item>"&gt;="</item>
+        <item>&lt;=</item>
+    </string-array>
 
 </resources>

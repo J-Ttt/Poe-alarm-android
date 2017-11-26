@@ -24,4 +24,19 @@
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:id="@+id/right_drawer"
+        android:background="#323130"
+        app:itemTextColor="@color/colorText">
+
+        <include layout="@layout/drawer_right"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            />
+    </LinearLayout>
+
+
 </android.support.v4.widget.DrawerLayout>

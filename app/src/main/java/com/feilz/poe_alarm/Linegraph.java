@@ -2,112 +2,147 @@ package com.feilz.poe_alarm;
 
 import android.app.Activity;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.Viewport;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.DataPointInterface;
-import com.jjoe64.graphview.series.LineGraphSeries;
-import com.jjoe64.graphview.series.OnDataPointTapListener;
-import com.jjoe64.graphview.series.Series;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import java.util.ArrayList;
 
-import org.w3c.dom.Text;
+import java.util.List;
 
-import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 
 class Linegraph  {
     //TODO
-    private GraphView graph;
+    private LineChart graph;
     private String defaultCurrency;
     private int color;
     private Activity callingActivity;
     private TextView minVal,maxVal;
 
-    Linegraph(GraphView graph, String currency, int appTextColor, Activity activity, TextView minVal, TextView maxVal){
+    Linegraph(LineChart graph, String currency, int appTextColor, Activity activity, TextView minVal, TextView maxVal){
         this.graph = graph;
         this.defaultCurrency = currency;
         this.color = appTextColor;
         this.callingActivity = activity;
         this.minVal=minVal;
         this.maxVal=maxVal;
-        graph.setTitleColor(appTextColor);
-        graph.setTitleTextSize(40);
+        drawGraph();
 
-        update(currency);
+        /*graph.setTitleColor(appTextColor);
+        graph.setTitleTextSize(50);
+
+        graph.getViewport().setScalable(true);
+        graph.getViewport().setScrollable(true);
+        graph.setFitsSystemWindows(true);*/
+        //update(currency);
     }
 
-    void update(String currency){
+    /*void update(String currency){
         updateTitle(currency);
-    }
-    void update(Map<Date,Double> map){
-        drawGraph(map);
+    }*/
+    void update(){
+        graph.clear();
+        drawGraph();
+
     }
 
-    private void updateTitle(String currency){
+    /*private void updateTitle(String currency){
         graph.setTitle(currency);
-    }
+    }*/
 
-    private void drawGraph(Map<Date,Double> map){
+    private void drawGraph(){
+        LineData data = new LineData();
+        List<Entry> values = new ArrayList<>();
+        for (int i=0;i<72;i++){
+            values.add(RandomData(i));
+        }
+        LineDataSet ldata = new LineDataSet(values,"randomData");
+        setSeriesSettings(ldata);
+        data.addDataSet(ldata);
+
+        graph.setData(data);
+        setGraphSettings();
+        /*
         graph.removeAllSeries();
         LineGraphSeries<DataPoint> ser = new LineGraphSeries<>(data(map));
         setSeriesSettings(ser);
-        graph.getViewport().setMaxX(Timestamp.valueOf("2017-11-10 00:00:00").getTime());
-        graph.getViewport().setMinX(Timestamp.valueOf("2017-10-09 00:00:00").getTime());
-        graph.addSeries(ser);
+        //graph.getViewport().setMaxX(Timestamp.valueOf("2017-11-10 00:00:00").getTime());
+        //graph.getViewport().setMinX(Timestamp.valueOf("2017-10-09 00:00:00").getTime());
+        graph.addSeries(ser);*/
     }
-
-    public DataPoint[] data(Map<Date,Double> map) {
-        DataPoint[] values = new DataPoint[map.size()];
+    /*
+    public LineDataSet RandomData() {
+        List<Entry> values = new ArrayList<>();
         SortedSet<Date> days = new TreeSet<>(map.keySet());
         int i = 0;
         for (Date m: days) {
             Date dd = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("MM.dd", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("HH", Locale.getDefault());
             NumberFormat form = new DecimalFormat("#0.00");
             Double nn=0.0;
             try{
-                dd = sdf.parse(sdf.format(m));
-                nn=(double)form.parse(form.format(map.get(m)));
+                dd = sdf.parse(sdf.format(m.getTime()));
+                nn=form.parse(form.format(map.get(m)));
             } catch (Exception e){
                 e.printStackTrace();
             }
-
-            DataPoint d = new DataPoint(dd,nn);
-            values[i]=(d);
+            Entry d = new Entry(dd,nn);
+            values[i]=d;
             i+=1;
         }
          return values;
+    }*/
+    //For customizing the viewport
+    private void setGraphSettings(){
+        graph.setVisibleXRangeMaximum(72);
+        graph.setVisibleXRangeMinimum(10);
+        graph.fitScreen();
+        graph.resetTracking();
+        graph.resetViewPortOffsets();
+        graph.setTouchEnabled(true);
+        graph.setScaleEnabled(true);
+        graph.setDragEnabled(true);
+        graph.setScrollBarFadeDuration(1);
+        graph.zoom(3,0,0,0);
+        graph.moveViewToX(48);
+        customizeXAxis();
+        moveLegend();
     }
-
-
-    private void setSeriesSettings(LineGraphSeries<DataPoint> ser){
+    //Customizing the line
+    private void setSeriesSettings(LineDataSet ser){
         ser.setColor(color);
-        ser.setThickness(2);
-        ser.setDrawDataPoints(true);
-        ser.setDataPointsRadius(6);
-        setNewMaxMin(ser.getHighestValueY(),ser.getLowestValueY());
-        ser.setOnDataPointTapListener(new OnDataPointTapListener() {
-            @Override
-            public void onTap(Series series, DataPointInterface dataPoint) {
-                Toast.makeText(callingActivity,"Value: " + Double.toString(dataPoint.getY()),Toast.LENGTH_SHORT).show();
-            }
-        });
+        ser.setCircleColor(color);
+        ser.setCircleColorHole(color);
+
+        ser.setLineWidth(1f);
+        ser.setCircleRadius(2);
+        setNewMaxMin(ser.getYMax(),ser.getYMin());
+
     }
-    private void setNewMaxMin(Double max, Double min){
-        String newMax = "Max: " + Double.toString(max);
+    private void moveLegend(){
+        graph.getLegend().setEnabled(false);
+    }
+    private void customizeXAxis(){
+        XAxis x = graph.getXAxis();
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setTextSize(10f);
+    }
+    private void setNewMaxMin(Float max, Float min){
+        /*NumberFormat form = new DecimalFormat("#0.0");
+        try {
+            max=(Float)form.parse(form.format(max));
+            min=(Float)form.parse(form.format(min));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        */
+        String newMax = "Max: " + max;
         maxVal.setText(newMax);
-        String newMin = "Min: "+ Double.toString(min);
-        maxVal.setText(newMin);
+        String newMin = "Min: "+ min;
+        minVal.setText(newMin);
     }
         //Reasoning behind this is found at the bottom of mainactivity.
       /*  void setGraphSize(int newWidth,int newHeight) {
@@ -124,4 +159,7 @@ class Linegraph  {
         graph.setLayoutParams(params);
 
     }*/
+    private Entry RandomData(float x) {
+          return new Entry(x,(float)(Math.random() * 5 + 8));
+    }
 }

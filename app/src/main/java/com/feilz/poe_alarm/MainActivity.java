@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -14,9 +14,9 @@ import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.constraint.solver.widgets.Snapshot;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.text.Layout;
+
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -27,24 +27,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.LineChart;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import org.w3c.dom.Text;
-
-import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
@@ -55,54 +56,100 @@ public class MainActivity extends AppCompatActivity
     private final static String prefs = "poe-alarm-prefs";
     private final static String currCurrency="currCurrency";
     public String currency;
+    private DrawerLayout mDraverLayout;
     boolean isBound = false;
-    GraphView graph;
+    private ListView lv;
+    LineChart graph;
     Linegraph linegraph;
-    FloatingActionButton CurrencyIcon,loadtestVideoAd;
+    FloatingActionButton CurrencyIcon,loadtestVideoAd,rightDrawerButton;
     AdView adView;
     private RewardedVideoAd mRewardedVideoAd;
-    EditText myEditText;
     Boolean ads = false;
     TextView minVal,maxVal;
+    Database db;
+    TrackedCurrencyAdapter adapter;
+    FirebaseDatabase firebaseDB;
+    DatabaseReference ref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar =  findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        minVal = (TextView)findViewById(R.id.minVal);
-        maxVal = (TextView)findViewById(R.id.maxVal);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        firebaseDB = FirebaseDatabase.getInstance();
+        ref = firebaseDB.getReference();
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<String> leagues = new ArrayList<>();
+                Iterable<DataSnapshot> i = dataSnapshot.getChildren();
+                for (DataSnapshot ii : i ){
+                    leagues.add(ii.getKey());
+                    //Log.i("snapshot", ii.toString());
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        //Log.i("firebasetest");
+        minVal = findViewById(R.id.minVal);
+        maxVal = findViewById(R.id.maxVal);
+        mDraverLayout =  findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
+                this, mDraverLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDraverLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        CurrencyIcon = (FloatingActionButton)findViewById(R.id.currencyIcon);
+        CurrencyIcon = findViewById(R.id.currencyIcon);
         CurrencyIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DrawerLayout drawer = (DrawerLayout)findViewById(R.id.drawer_layout);
-                if (!drawer.isDrawerOpen(GravityCompat.START)){
-                    drawer.openDrawer(GravityCompat.START);
+                if (!mDraverLayout.isDrawerOpen(GravityCompat.START)){
+                    mDraverLayout.openDrawer(GravityCompat.START);
                 }
             }
         });
-
+        rightDrawerButton = findViewById(R.id.rightDrawerButton);
+        rightDrawerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!mDraverLayout.isDrawerOpen(GravityCompat.END)){
+                    mDraverLayout.openDrawer(GravityCompat.END);
+                }
+            }
+        });
         SharedPreferences settings = getSharedPreferences(prefs,0);
         currency = settings.getString(currCurrency,getString(R.string.chaos_orb));
-
-        graph = (GraphView)findViewById(R.id.graph);
+        Button rightDrawerButton = findViewById(R.id.button3);
+        rightDrawerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this,TrackNewCurrency.class);
+                i.putExtra("selectedCurrency",currency);
+                i.putExtra("seekBarMaxVal",14);
+                i.putExtra("seekBarMinVal",9);
+                i.putExtra("currVal",13);
+                startActivity(i);
+            }
+        });
+        graph = findViewById(R.id.graph);
         linegraph = new Linegraph(graph,currency,getResources().getColor(R.color.colorText),this,minVal,maxVal);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setItemIconTintList(null);
-        navigationView.setNavigationItemSelectedListener(this);
+        NavigationView drawerLeft = findViewById(R.id.nav_view);
+        drawerLeft.setItemIconTintList(null);
+        drawerLeft.setNavigationItemSelectedListener(this);
 
-        MobileAds.initialize(this,getString(R.string.banner_ad_unit_id));
+
         if (ads) {
-            adView = (AdView) findViewById(R.id.adView);
+            MobileAds.initialize(this,getString(R.string.banner_ad_unit_id));
+
+            adView = findViewById(R.id.adView);
             AdRequest adRequest = new AdRequest.Builder().addTestDevice("C1FB146C50B90BC0745718D2C1E78156").build();
             adView.loadAd(adRequest);
 
@@ -112,25 +159,54 @@ public class MainActivity extends AppCompatActivity
         Intent i = new Intent(MainActivity.this, BackgroundService.class);
         bindService(i,bgServiceConnection,Context.BIND_AUTO_CREATE);
 
-        loadtestVideoAd = (FloatingActionButton)findViewById(R.id.testButton);
+        loadtestVideoAd = findViewById(R.id.testButton);
         loadtestVideoAd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //loadRewardedVideoAd();
                 Map<Date,Double> newData = bgService.newRandomData();
-                linegraph.update(newData);
+                linegraph.update();
             }
         });
+        ArrayList<TrackedCurrency> trackedCurrencies = new ArrayList<>();
+        try {
+            Cursor c = db.getAllAlarms();
+            for (c.moveToFirst();!c.isAfterLast();c.moveToNext()){
+                String curr = c.getString(c.getColumnIndexOrThrow(DatabaseSQLStrings.columnNames.currencies));
+                String l = c.getString(c.getColumnIndexOrThrow(DatabaseSQLStrings.columnNames.league));
+                double val = Double.parseDouble(c.getString(c.getColumnIndexOrThrow(DatabaseSQLStrings.columnNames.value)));
+                boolean lessth = c.getInt(c.getColumnIndexOrThrow(DatabaseSQLStrings.columnNames.lessThan))>0;
+                trackedCurrencies.add(new TrackedCurrency(curr,lessth,val,l));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        /*
+        //for testing purposes
+        trackedCurrencies.add(new TrackedCurrency("Chaos Orb",false,4.23,"Harbinger"));
+        trackedCurrencies.add(new TrackedCurrency("Alteration Orb",true,101.53,"Harbinger"));
+        */
+
+        adapter = new TrackedCurrencyAdapter(this,trackedCurrencies);
+        lv = findViewById(R.id.listView2);
+        lv.setAdapter(adapter);
     }
 
-
+    public void addToAlarmList(TrackedCurrency tc){
+        db.insertNewAlarm(tc.currency,tc.lessThan,tc.value,tc.league);
+        adapter.add(tc);
+    }
+    public void removeFromAlarmList(TrackedCurrency tc){
+        adapter.remove(tc);
+    }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (mDraverLayout.isDrawerOpen(GravityCompat.START)) {
+            mDraverLayout.closeDrawer(GravityCompat.START);
+        } else if (mDraverLayout.isDrawerOpen(GravityCompat.END)) {
+            mDraverLayout.closeDrawer(GravityCompat.END);
         } else {
             super.onBackPressed();
         }
@@ -139,14 +215,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart(){
         super.onStart();
-        linegraph.update(currency);
+        //linegraph.update(currency);
 
     }
     protected void onResume(){
         super.onResume();
-        /* Don't yet know where exactly to put this.
-        Map<Date,Double> newData = bgService.newRandomData();
-        linegraph.update(newData);*/
     }
     @Override
     public void onStop(){
@@ -280,16 +353,16 @@ public class MainActivity extends AppCompatActivity
                 newSelection(getString(R.string.blacksmith_s_whetstone),getDrawable(R.drawable.whetstone));
                 break;
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
     void newSelection(String curr, Drawable drawable){
         currency = curr;
-        linegraph.update(currency);
+        //linegraph.update(currency);
         Map<Date,Double> newData = bgService.newRandomData();
-        linegraph.update(newData);
+        //linegraph.update(newData);
         CurrencyIcon.setImageDrawable(drawable);
     }
 
@@ -339,6 +412,7 @@ public class MainActivity extends AppCompatActivity
             BackgroundService.MyLocalBinder binder = (BackgroundService.MyLocalBinder) iBinder;
             bgService = binder.getService();
             isBound = true;
+            //linegraph.update(bgService.newRandomData());
         }
 
         @Override
@@ -346,6 +420,15 @@ public class MainActivity extends AppCompatActivity
             isBound = false;
         }
     };
+    /* hyvä tapa saada koodi pyörii layoutin latauksen jälkee.
+        ConstraintLayout mConstLayout = (ConstraintLayout)findViewById(R.id.constLayout);
+        mConstLayout.post(new Runnable(){
+            @Override
+            public void run() {
+                Map<Date,Double> newData = bgService.newRandomData();
+                linegraph.update(newData);
+            }
+        });*/
     /*
     //Attempted to manually handle different screen sizes, didn't realize until about 5h later that
     //constraintLayout actually does it by itself.... :(

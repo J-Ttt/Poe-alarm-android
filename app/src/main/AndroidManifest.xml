@@ -22,6 +22,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".TrackNewCurrency"
+            android:theme="@style/myDialog"/>
         <service
             android:name=".BackgroundService"
             android:exported="true"/>
