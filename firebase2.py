@@ -5,6 +5,7 @@ import time
 from threading import Thread, RLock, Event
 import numpy as np
 from copy import deepcopy
+import datetime
 
 
 
@@ -30,11 +31,14 @@ def configure():
 def getAll(db):
     base = db.get()
     return base.val()
+
 def getday(league, item, db):
-    return db.child(league).child(item).child("Day").get()
+    day = db.child(league).child(item).child("Day").get()
+    return day.val()
 
 def getMonth(league, item, db):
-    return db.child(league).child(item).child("Month").get()
+    month = db.child(league).child(item).child("Month").get()
+    return month.val()
 
 def setData(db, childname, data):
     db.child(childname).set(data)
@@ -79,6 +83,35 @@ def saver(exit):
             avr = avarages(kopio)
             for league in avr:
                 db.child(league).child(date).child(timestamp).set(avr[league])
+            for item in avr["Harbinger"]:
+                day = getday("test", item, db)
+                month = getMonth("test", item, db)
+                for hour in range(23):
+                    temp = day[hour + 1]
+                    day[hour + 1] = day[hour]
+                day[0] = avr["Harbinger"][item]
+                now = datetime.datetime.now()
+                if now.hour == 1:
+                    for dayM in range(30):
+                        temp = month[dayM + 1]
+                        month[dayM + 1] = month[dayM]
+                    month[0] = avr["Harbinger"][item]
+                elif now.hour != 0:
+                    avrg = 0
+                    for i in range(now.hour):
+                        avrg += day[i][0]
+                    avrg = avrg/now.hour
+                    month[0] = avrg
+                else:
+                    avrg = 0
+                    for i in range(24):
+                        avrg += day[i][0]
+                    avrg = avrg/24
+                    month[0] = avrg
+                db.child["test"][item]["Day"].set(day)
+                db.child["test"][item]["Month"].set(month)
+
+
     print("saver dead")
 
 def empty():
@@ -151,7 +184,7 @@ converted = {
 lock = RLock()
 def main(exit):
     print("Reader on")
-    numb = "109411732-114740114-107649049-124071517-116018367"
+    numb = "109673639-115023012-107902934-124374589-116288178"
     id = "?id=" + numb
     sites = 0
     stashes = 0

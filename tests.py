@@ -18,6 +18,13 @@ def getAll(db):
     base = db.get()
     return base.val()
 
+def getday(league, item, db):
+    return db.child(league).child(item).child("Day").get()
+
+
+def getMonth(league, item, db):
+    return db.child(league).child(item).child("Month").get()
+
 def setData(db, childname, data):
     db.child(childname).set(data)
 
@@ -58,5 +65,10 @@ if __name__ == "__main__":
         data = json.load(kohde)
 
     avr = avarages(data)
-    for i in avr:
-            db.child(i).child(date).child("16:56").set(avr[i])
+    harb = avr["Harbinger"]
+    for item in harb:
+        for i in range(31):
+            db.child("test").child(item).child("Month").child(i).set((0, 0))
+        for i in range(24):
+            db.child("test").child(item).child("Day").child(i).set((0, 0))
+        db.child("test").child(item).child("Year").child(time.strftime("%Y")).set((0, 0))
