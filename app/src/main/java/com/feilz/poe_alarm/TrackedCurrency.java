@@ -1,9 +1,5 @@
 package com.feilz.poe_alarm;
 
-/**
- * Created by dakerlun on 20/11/2017.
- */
-
 public class TrackedCurrency {
     public String currency;
     public Boolean lessThan;

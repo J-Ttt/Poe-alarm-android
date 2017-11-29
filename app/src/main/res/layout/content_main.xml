@@ -21,8 +21,9 @@
         android:layout_marginTop="8dp"
         android:background="#40ffffff"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/leagueChoice" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/currencyIcon"
@@ -44,13 +45,13 @@
         android:layout_marginEnd="31dp"
         android:layout_marginStart="9dp"
         android:layout_marginTop="8dp"
+        app:adSize="BANNER"
+        app:adUnitId="@string/banner_ad_unit_id"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/graph"
-        app:layout_constraintVertical_bias="0.968"
-        app:adSize="BANNER"
-        app:adUnitId="@string/banner_ad_unit_id"/>
+        app:layout_constraintVertical_bias="0.968" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/testButton"
@@ -108,5 +109,22 @@
         app:layout_constraintStart_toEndOf="@+id/currencyIcon"
         app:layout_constraintTop_toBottomOf="@+id/graph"
         app:srcCompat="@drawable/ic_menu_manage" />
+
+    <Spinner
+        android:id="@+id/leagueChoice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/spinner_background"
+        android:popupBackground="@color/bgcolor"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/graph"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

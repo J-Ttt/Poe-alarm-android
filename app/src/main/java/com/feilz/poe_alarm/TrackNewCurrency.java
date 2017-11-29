@@ -1,7 +1,9 @@
 package com.feilz.poe_alarm;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -22,9 +24,12 @@ public class TrackNewCurrency extends Activity {
     Button accept;
     SeekBar seekbar;
     double step = 0.1;
-    MainActivity m;
+    MyApp mApp;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState){
+        mApp = (MyApp)getApplicationContext();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.newcurrencytotrack);
         Bundle extras = getIntent().getExtras();
@@ -35,14 +40,15 @@ public class TrackNewCurrency extends Activity {
         final int currStatus = extras.getInt("currVal",0);
         selectedCurrency.setSelection(selectInitialCurrency(selCurr));
         ltorgt=findViewById(R.id.spinner);
-        //leagueSpinner = findViewById(R.id.leagueSpinner);
-       // leagueSpinner.setAdapter(m.spinnerAdapter); //CREATE SPINNERADAPTER
+        leagueSpinner = findViewById(R.id.leagueSpinner);
+        leagueSpinner.setAdapter(mApp.getLeagueChoice());
 
         seekbar=findViewById(R.id.seekBar);
         int maxSeekBar = (int)((max-min)/step)+1;
         seekbar.setMax(maxSeekBar);
         int progressSeekBar = (int)((currStatus-min)/step);
         seekbar.setProgress(progressSeekBar);
+
 
         //Log.d("maxVal",String.valueOf(maxSeekBar));
         //Log.d("progressVal",String.valueOf(progressSeekBar));
@@ -61,10 +67,13 @@ public class TrackNewCurrency extends Activity {
                 String league = String.valueOf(leagueSpinner.getSelectedItem());
                 String curr = String.valueOf(selectedCurrency.getSelectedItem());
                 boolean type = String.valueOf(ltorgt.getSelectedItem()).equals("<=");
-
-                m.addToAlarmList(new TrackedCurrency(curr,type,Double.valueOf(showval.getText().toString()),league));
-                Toast.makeText(m.getApplicationContext(),"Added tracker for " + curr + " "+ type + showval.getText(),Toast.LENGTH_SHORT).show();
-                //TODO: write to database method
+                Intent data = new Intent();
+                data.putExtra("currency",curr);
+                data.putExtra("league",league);
+                data.putExtra("lessThan",type);
+                data.putExtra("value",showval.getText().toString());
+                setResult(RESULT_OK,data);
+               //TODO: write to database method
                 finish();
             }
         });

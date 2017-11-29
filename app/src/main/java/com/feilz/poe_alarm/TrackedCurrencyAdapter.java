@@ -32,9 +32,10 @@ public class TrackedCurrencyAdapter extends ArrayAdapter<TrackedCurrency> {
         TextView value = convertView.findViewById(R.id.textviewvalue);
         TextView league = convertView.findViewById(R.id.league);
         FloatingActionButton delButton = convertView.findViewById(R.id.deleteButton);
-
+        db = new Database(getContext());
         currency.setText(trackedCurrency.currency);
-        league.setText(trackedCurrency.league);
+        String leagueText = "Server: " + trackedCurrency.league;
+        league.setText(leagueText);
         lessThan.setText(trackedCurrency.lessThan ? "<=":">=");
         String va = " "+trackedCurrency.value;
         delButton.setOnClickListener(new View.OnClickListener() {

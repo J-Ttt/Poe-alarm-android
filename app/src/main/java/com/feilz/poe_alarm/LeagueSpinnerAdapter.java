@@ -10,15 +10,13 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-/**
- * Created by dakerlun on 26/11/2017.
- */
+import java.util.ArrayList;
 
 public class LeagueSpinnerAdapter extends ArrayAdapter<String> {
 
 
-    public LeagueSpinnerAdapter(@NonNull Context context, int resource) {
-        super(context, resource);
+    LeagueSpinnerAdapter(@NonNull Context context, int resourceId,int textViewId, ArrayList<String> resource) {
+        super(context,resourceId,textViewId, resource);
     }
 
     @NonNull
@@ -28,7 +26,7 @@ public class LeagueSpinnerAdapter extends ArrayAdapter<String> {
         String item = getItem(position);
         if (convertView==null){
             convertView = LayoutInflater.from(getContext()).inflate(
-                    R.layout.spinneritemview,parent,false);
+                    R.layout.spinneritemview2,parent,false);
         }
         TextView txt = convertView.findViewById(R.id.spinnerItem);
         txt.setText(item);

@@ -1,9 +1,13 @@
 package com.feilz.poe_alarm;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.sql.Timestamp;
@@ -20,9 +24,13 @@ public class BackgroundService extends Service {
     private final IBinder myBinder = new MyLocalBinder();
     public BackgroundService() {
     }
+
+
     //RETURN NEW RANDOM DATA BASED ON Y TIMESTAMPS AND X VALUES
     //TRYING TO SIMULATE THE DATA I'M EXPECTING FROM THE DATABASE
-    public Map<Date,Double> newRandomData(){
+
+
+    /*   public Map<Date,Double> newRandomData(){
         double[] values = new double[10];
         Timestamp[] dates = new Timestamp[10];
         Map<Date,Double> returnval = new HashMap<Date, Double>();
@@ -43,7 +51,7 @@ public class BackgroundService extends Service {
         Log.i("service","done");
         return returnval;
     }
-/*
+
     public getNewData(){
 
     }
@@ -57,5 +65,13 @@ public class BackgroundService extends Service {
         BackgroundService getService() {
             return BackgroundService.this;
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void sendNotification(){
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(this, "my_channel_01");
+    }
+    public void sendNotification2(){
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
     }
 }

@@ -10,9 +10,9 @@ class DatabaseSQLStrings {
             alarm_table_name + "(" +
             columnNames._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             columnNames.currencies + " TEXT," +
-            columnNames.lessThan + " BOOLEAN " +
+            columnNames.lessThan + " BOOLEAN, " +
             columnNames.timestamp + " REAL DEFAULT 0, " +
-            columnNames.league + " TEXT " +
+            columnNames.league + " TEXT, " +
             columnNames.value + " FLOAT(7,3)" +
             ")";
     static final String DROP_ALARM_TABLE = "DROP TABLE IF EXISTS " + alarm_table_name;
@@ -21,9 +21,8 @@ class DatabaseSQLStrings {
 
     static final String CREATE_LEAGUE_TABLE = "CREATE TABLE IF NOT EXISTS " +
             league_names_table + "(" +
-            columnNames._ID + "INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            columnNames.league + " TEXT " +
-            columnNames.helpNum + " INTEGER)";
+            columnNames._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            columnNames.league + " TEXT)";
 
     static final String DROP_LEAGUE_TABLE = "DROP TABLE IF EXISTS " + league_names_table;
 
@@ -34,6 +33,5 @@ class DatabaseSQLStrings {
         static final String timestamp = "timestamp";
         static final String value = "value";
         static final String league = "league";
-        static final String helpNum = "helpNum";
     }
 }

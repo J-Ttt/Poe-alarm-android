@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity
     BackgroundService bgService;
     private final static String prefs = "poe-alarm-prefs";
     private final static String currCurrency="currCurrency";
+    private final static int REQUEST_CODE_TRACK_NEW_CURRENCY = 1;
     public String currency;
     private DrawerLayout mDraverLayout;
     boolean isBound = false;
@@ -70,6 +72,9 @@ public class MainActivity extends AppCompatActivity
     TrackedCurrencyAdapter adapter;
     FirebaseDatabase firebaseDB;
     DatabaseReference ref;
+    LeagueSpinnerAdapter spinnerAdapter;
+    Spinner leagueChoice;
+    MyApp mApp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +82,16 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar =  findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        mApp = (MyApp)getApplicationContext();
         firebaseDB = FirebaseDatabase.getInstance();
         ref = firebaseDB.getReference();
+
+        db = new Database(this);
+
+        leagueChoice = findViewById(R.id.leagueChoice);
+
+
+        //ONLY FOR UPDATING PURPOSES, FOR SPEED SAKE USE LOCAL DATABASE AS WELL
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -90,8 +102,13 @@ public class MainActivity extends AppCompatActivity
                     //Log.i("snapshot", ii.toString());
                 }
 
+                //HANDLE SOMEWHERE CHANGES IN LIST?!
+                if (!(db.checkIfLeaguesExists(leagues))) {
+                    ArrayList<String> newLeagues = db.getAllLeagues();
+                    spinnerAdapter.clear();
+                    spinnerAdapter.addAll(newLeagues);
+                }
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -132,10 +149,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this,TrackNewCurrency.class);
                 i.putExtra("selectedCurrency",currency);
-                i.putExtra("seekBarMaxVal",14);
-                i.putExtra("seekBarMinVal",9);
-                i.putExtra("currVal",13);
-                startActivity(i);
+                startActivityForResult(i,REQUEST_CODE_TRACK_NEW_CURRENCY);
             }
         });
         graph = findViewById(R.id.graph);
@@ -164,8 +178,9 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 //loadRewardedVideoAd();
-                Map<Date,Double> newData = bgService.newRandomData();
-                linegraph.update();
+                //Map<Date,Double> newData = bgService.newRandomData();
+                //linegraph.update();
+                db.resetTables();
             }
         });
         ArrayList<TrackedCurrency> trackedCurrencies = new ArrayList<>();
@@ -197,9 +212,6 @@ public class MainActivity extends AppCompatActivity
         db.insertNewAlarm(tc.currency,tc.lessThan,tc.value,tc.league);
         adapter.add(tc);
     }
-    public void removeFromAlarmList(TrackedCurrency tc){
-        adapter.remove(tc);
-    }
 
     @Override
     public void onBackPressed() {
@@ -220,6 +232,9 @@ public class MainActivity extends AppCompatActivity
     }
     protected void onResume(){
         super.onResume();
+        spinnerAdapter = new LeagueSpinnerAdapter(getApplicationContext(),R.layout.spinneritemview2,R.id.spinnerItem,db.getAllLeagues());
+        mApp.setLeagueChoice(spinnerAdapter);
+        leagueChoice.setAdapter(spinnerAdapter);
     }
     @Override
     public void onStop(){
@@ -234,6 +249,20 @@ public class MainActivity extends AppCompatActivity
     private void loadRewardedVideoAd(){
         mRewardedVideoAd.loadAd("ca-app-pub-3940256099942544/5224354917",
                 new AdRequest.Builder().addTestDevice("C1FB146C50B90BC0745718D2C1E78156").build());
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if (requestCode==REQUEST_CODE_TRACK_NEW_CURRENCY){
+            if (resultCode == RESULT_OK){
+                String curr = data.getStringExtra("currency");
+                String league = data.getStringExtra("league");
+                boolean lessThan = data.getBooleanExtra("lessThan",true);
+                String value = data.getStringExtra("value");
+                addToAlarmList(new TrackedCurrency(curr,lessThan,Double.valueOf(value),league));
+                db.insertNewAlarm(curr,lessThan,Double.valueOf(value),league);
+                Toast.makeText(getApplicationContext(),"Added tracker for " + curr + " "+ (lessThan?"<= ":">= ") + value,Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
@@ -361,8 +390,8 @@ public class MainActivity extends AppCompatActivity
     void newSelection(String curr, Drawable drawable){
         currency = curr;
         //linegraph.update(currency);
-        Map<Date,Double> newData = bgService.newRandomData();
-        //linegraph.update(newData);
+        //Map<Date,Double> newData = bgService.newRandomData();
+        linegraph.update();
         CurrencyIcon.setImageDrawable(drawable);
     }
 
