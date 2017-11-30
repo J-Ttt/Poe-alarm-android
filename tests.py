@@ -68,79 +68,84 @@ if __name__ == "__main__":
 
     avr = avarages(data)
     harb = avr["Harbinger"]
-    for item in avr["Harbinger"]:
-        day = getday("test", item, db)
-        month = getMonth("test", item, db)
-        if day == None or len(day) != 72:
+    for x in range(5):
+        for item in avr["Harbinger"]:
+            day = getday("test", item, db)
+            month = getMonth("test", item, db)
+            if day == None or len(day) != 75:
+
+                day = {}
+
+                month = {}
+                for i in range(72):
+                    day[str(i)] = (0,0)
+                for a in range(31):
+                    month[str(a)] = (0,0)
+            temp = day["0"]
+            for hour in range(71):
+                temp2 = day[str(hour +1)]
+                day[str(hour +1)] = temp
+                temp = temp2
+            #print(day)
+            day[0] = avr["Harbinger"][item]
+            now = datetime.datetime.now()
+            if now.hour == 1:
+                for dayM in range(30):
+                    temp = month[dayM + 1]
+                    month[dayM + 1] = month[dayM]
+                month[0] = avr["Harbinger"][item]
+            elif now.hour != 0:
+                avrg = 0
+                kpl = 0
+                for i in range(24):
+                    avrg += day[str(i)][0]
+                    kpl += day[str(i)][1]
+                avrg = avrg/now.hour
+                month[0] = (avrg, kpl)
+            else:
+                avrg = 0
+                for i in range(24):
+                    avrg += day[str(i)][0]
+                avrg = avrg/24
+                month[0] = avrg
+            dailyA = 0
+            monthlyA = 0
+            dayH = -float("Inf")
+            dayL = float("Inf")
+            monthH = -float("Inf")
+            monthL = float("Inf")
+            for i in range(72):
+                dailyA += day[str(i)][0]
+                if day[str(i)][0] < dayL:
+                    dayL = day[str(i)][0]
+
+                if day[str(i)][0] > dayH:
+                    dayH = day[str(i)][0]
+
+            for i in range(31):
+                monthlyA += month[str(i)][0]
+                if month[str(i)][0] < monthL:
+                    monthL = month[str(i)][0]
+                if month[str(i)][0] > monthH:
+                    monthH = month[str(i)][0]
+            dailyA = dailyA/72
+            monthlyA = monthlyA/31
+            day["avrg"] = dailyA
+            day["Highest"] = dayH
+            day["Lowest"] = dayL
+            month["avrg"] = monthlyA
+            month["Highest"] = monthH
+            month["Lowest"] = monthL
+
+            db.child("test").child(item).child("Day").set(day)
+            db.child("test").child(item).child("Month").set(month)
+
+        """for item in avr["Harbinger"]:
             day = {}
             month = {}
-            for i in range(72):
+            for i in range(24):
                 day[i] = (0,0)
             for a in range(31):
                 month[a] = (0,0)
-        for hour in range(71):
-            temp = day[hour + 1]
-            day[hour + 1] = day[hour]
-
-        day[0] = avr["Harbinger"][item]
-        now = datetime.datetime.now()
-        if now.hour == 1:
-            for dayM in range(30):
-                temp = month[dayM + 1]
-                month[dayM + 1] = month[dayM]
-            month[0] = avr["Harbinger"][item]
-        elif now.hour != 0:
-            avrg = 0
-            kpl = 0
-            for i in range(24):
-                avrg += day[i][0]
-                kpl += day[i][1]
-            avrg = avrg/now.hour
-            month[0] = (avrg, kpl)
-        else:
-            avrg = 0
-            for i in range(24):
-                avrg += day[i][0]
-            avrg = avrg/24
-            month[0] = avrg
-        dailyA = 0
-        monthlyA = 0
-        dayH = -float("Inf")
-        dayL = float("Inf")
-        monthH = -float("Inf")
-        monthL = float("Inf")
-        for i in day:
-            dailyA += day[i][0]
-            if day[i][0] < dayL:
-                dayL = day[i][0]
-
-            if day[i][0] > dayH:
-                dayH = day[i][0]
-
-        for i in month:
-            monthlyA += month[i][0]
-            if month[i][0] < monthL:
-                monthL = month[i][0]
-            if month[i][0] > monthH:
-                monthH = month[i][0]
-        dailyA = dailyA/72
-        monthlyA = monthlyA/31
-        day["avrg"] = dailyA
-        day["Highest"] = dayH
-        day["Lowest"] = dayL
-        month["avrg"] = monthlyA
-        month["Highest"] = monthH
-        month["Lowest"] = monthL
-
-        db.child("test").child(item).child("Day").set(day)
-        db.child("test").child(item).child("Month").set(month)
-
-    """for item in avr["Harbinger"]:
-        day = {}
-        month = {}
-        for i in range(24):
-            day[i] = (0,0)
-        for a in range(31):
-            month[a] = (0,0)
-        db.child("test").child(item).child("Day").set(day)
-        db.child("test").child(item).child("Month").set(month)"""
+            db.child("test").child(item).child("Day").set(day)
+            db.child("test").child(item).child("Month").set(month)"""

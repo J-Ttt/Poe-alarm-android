@@ -40,6 +40,10 @@ def getMonth(league, item, db):
     month = db.child(league).child(item).child("Month").get()
     return month.val()
 
+def getYear(league, item, db):
+    year = db.child(league).child(item).child("Year").get()
+    return year.val()
+
 def setData(db, childname, data):
     db.child(childname).set(data)
 
@@ -81,35 +85,93 @@ def saver(exit):
             firebase = configure()
             db = firebase.database()
             avr = avarages(kopio)
+            now = datetime.datetime.now()
             for league in avr:
                 db.child(league).child(date).child(timestamp).set(avr[league])
-            for item in avr["Harbinger"]:
-                day = getday("test", item, db)
-                month = getMonth("test", item, db)
-                for hour in range(23):
-                    temp = day[hour + 1]
-                    day[hour + 1] = day[hour]
-                day[0] = avr["Harbinger"][item]
-                now = datetime.datetime.now()
-                if now.hour == 1:
-                    for dayM in range(30):
-                        temp = month[dayM + 1]
-                        month[dayM + 1] = month[dayM]
-                    month[0] = avr["Harbinger"][item]
-                elif now.hour != 0:
-                    avrg = 0
-                    for i in range(now.hour):
-                        avrg += day[i][0]
-                    avrg = avrg/now.hour
-                    month[0] = avrg
-                else:
-                    avrg = 0
-                    for i in range(24):
-                        avrg += day[i][0]
-                    avrg = avrg/24
-                    month[0] = avrg
-                db.child("test").child(item).child("Day").set(day)
-                db.child("test").child(item).child("Month").set(month)
+                print("{} saved".format(league))
+                for item in avr[league]:
+                    day = getday(league, item, db)
+                    month = getMonth(league, item, db)
+                    if day == None or len(day) != 75:
+                        day = {}
+                        month = {}
+                        for i in range(72):
+                            day[str(i)] = (0,0)
+                        for a in range(31):
+                            month[str(a)] = (0,0)
+                    temp = day["0"]
+                    for hour in range(71):
+                        temp2 = day[str(hour +1)]
+                        day[str(hour +1)] = temp
+                        temp = temp2
+
+                    day[0] = avr[league][item]
+                    if now.day == 1 and now.hour == 1:
+                        year = getYear(league, item, db)
+                        if year == None:
+                            year = {}
+                        total = 0
+                        if now.month == 1:
+                            lastDays = (datetime.date(now.year-1, 12, now.day) - datetime.date(now.year, now.month, now.day)).days
+                        else:
+                            lastDays = (datetime.date(now.year, now.month-1, now.day) - datetime.date(now.year, now.month, now.day)).days
+                        for day in range(lastDays):
+                            total += month[day][0]
+                        totalAvr = total/lastDays
+                        monthMark = time.strftime("%m-%Y")
+                        year[monthMark] = totalAvr
+                        db.child(league).child(item).child("Year").set(year)
+
+                    if now.hour == 1:
+                        for dayM in range(30):
+                            temp = month[dayM + 1]
+                            month[dayM + 1] = month[dayM]
+                        month[0] = avr[league][item]
+                    elif now.hour != 0:
+                        avrg = 0
+                        kpl = 0
+                        for i in range(24):
+                            avrg += day[str(i)][0]
+                            kpl += day[str(i)][1]
+                        avrg = avrg/now.hour
+                        month[0] = (avrg, kpl)
+                    else:
+                        avrg = 0
+                        for i in range(24):
+                            avrg += day[str(i)][0]
+                        avrg = avrg/24
+                        month[0] = avrg
+                    dailyA = 0
+                    monthlyA = 0
+                    dayH = -float("Inf")
+                    dayL = float("Inf")
+                    monthH = -float("Inf")
+                    monthL = float("Inf")
+                    for i in range(72):
+                        dailyA += day[str(i)][0]
+                        if day[str(i)][0] < dayL:
+                            dayL = day[str(i)][0]
+
+                        if day[str(i)][0] > dayH:
+                            dayH = day[str(i)][0]
+
+                    for i in range(31):
+                        monthlyA += month[str(i)][0]
+                        if month[str(i)][0] < monthL:
+                            monthL = month[str(i)][0]
+                        if month[str(i)][0] > monthH:
+                            monthH = month[str(i)][0]
+                    dailyA = dailyA/72
+                    monthlyA = monthlyA/31
+                    day["avrg"] = dailyA
+                    day["Highest"] = dayH
+                    day["Lowest"] = dayL
+                    month["avrg"] = monthlyA
+                    month["Highest"] = monthH
+                    month["Lowest"] = monthL
+
+                    db.child(league).child(item).child("Day").set(day)
+                    db.child(league).child(item).child("Month").set(month)
 
 
     print("saver dead")
@@ -184,7 +246,7 @@ converted = {
 lock = RLock()
 def main(exit):
     print("Reader on")
-    numb = "109673639-115023012-107902934-124374589-116288178"
+    numb = "110246968-115636396-108476299-125029748-116875259"
     id = "?id=" + numb
     sites = 0
     stashes = 0
