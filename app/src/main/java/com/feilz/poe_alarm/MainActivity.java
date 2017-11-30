@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity
     AdView adView;
     private RewardedVideoAd mRewardedVideoAd;
     Boolean ads = false;
-    TextView minVal,maxVal;
+    TextView minVal,maxVal,avrg;
     Database db;
     TrackedCurrencyAdapter adapter;
     FirebaseDatabase firebaseDB;
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity
         db = new Database(this);
 
         leagueChoice = findViewById(R.id.leagueChoice);
-
+        spinnerAdapter = new LeagueSpinnerAdapter(getApplicationContext(),R.layout.spinneritemview2,R.id.spinnerItem,db.getAllLeagues());
 
         //ONLY FOR UPDATING PURPOSES, FOR SPEED SAKE USE LOCAL DATABASE AS WELL
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity
         //Log.i("firebasetest");
         minVal = findViewById(R.id.minVal);
         maxVal = findViewById(R.id.maxVal);
+        avrg = findViewById(R.id.avrg);
         mDraverLayout =  findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mDraverLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         graph = findViewById(R.id.graph);
-        linegraph = new Linegraph(graph,currency,getResources().getColor(R.color.colorText),this,minVal,maxVal);
+        linegraph = new Linegraph(graph,getResources().getColor(R.color.colorText),this,minVal,maxVal,avrg);
 
         NavigationView drawerLeft = findViewById(R.id.nav_view);
         drawerLeft.setItemIconTintList(null);
@@ -232,10 +233,13 @@ public class MainActivity extends AppCompatActivity
     }
     protected void onResume(){
         super.onResume();
-        spinnerAdapter = new LeagueSpinnerAdapter(getApplicationContext(),R.layout.spinneritemview2,R.id.spinnerItem,db.getAllLeagues());
+        SharedPreferences settings = getSharedPreferences(prefs,0);
+        currency = settings.getString(currCurrency,getString(R.string.chaos_orb));
         mApp.setLeagueChoice(spinnerAdapter);
         leagueChoice.setAdapter(spinnerAdapter);
+        //linegraph.update("Harbinger",currency,"Day");
     }
+
     @Override
     public void onStop(){
         super.onStop();
@@ -391,7 +395,7 @@ public class MainActivity extends AppCompatActivity
         currency = curr;
         //linegraph.update(currency);
         //Map<Date,Double> newData = bgService.newRandomData();
-        linegraph.update();
+        linegraph.update(leagueChoice.getSelectedItem().toString(),currency,"Day");
         CurrencyIcon.setImageDrawable(drawable);
     }
 

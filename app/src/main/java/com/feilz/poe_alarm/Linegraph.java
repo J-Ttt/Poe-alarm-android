@@ -1,6 +1,7 @@
 package com.feilz.poe_alarm;
 
 import android.app.Activity;
+import android.util.Log;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -8,8 +9,15 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -20,16 +28,18 @@ class Linegraph  {
     private String defaultCurrency;
     private int color;
     private Activity callingActivity;
-    private TextView minVal,maxVal;
+    private TextView minVal,maxVal, average;
+    private DatabaseReference database;
 
-    Linegraph(LineChart graph, String currency, int appTextColor, Activity activity, TextView minVal, TextView maxVal){
+    Linegraph(LineChart graph, int appTextColor, Activity activity, TextView minVal, TextView maxVal,TextView average){
         this.graph = graph;
-        this.defaultCurrency = currency;
         this.color = appTextColor;
         this.callingActivity = activity;
         this.minVal=minVal;
         this.maxVal=maxVal;
-        drawGraph();
+        this.average=average;
+        database = FirebaseDatabase.getInstance().getReference();
+
 
         /*graph.setTitleColor(appTextColor);
         graph.setTitleTextSize(50);
@@ -43,28 +53,67 @@ class Linegraph  {
     /*void update(String currency){
         updateTitle(currency);
     }*/
-    void update(){
+    void update(String league,String currency,String period){
         graph.clear();
-        drawGraph();
-
+        drawGraph(league,currency,period);
     }
 
     /*private void updateTitle(String currency){
         graph.setTitle(currency);
     }*/
 
-    private void drawGraph(){
+    private void drawGraph(String league, final String currency, String period){
         LineData data = new LineData();
         List<Entry> values = new ArrayList<>();
-        for (int i=0;i<72;i++){
-            values.add(RandomData(i));
-        }
+
+        database.child(league).child(currency).child(period).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                LineData data = new LineData();
+                List<Entry> values = new ArrayList<>();
+                Float highest = Float.valueOf(dataSnapshot.child("Highest").getValue().toString());
+                Float lowest = Float.valueOf(dataSnapshot.child("Lowest").getValue().toString());
+                Float averages = Float.valueOf(dataSnapshot.child("avrg").getValue().toString());
+                Log.i("datatest",highest.toString());
+                Log.i("datatest2",lowest.toString());
+
+                Log.i("datatest2",averages.toString());
+
+                setNewMaxMin(highest,lowest,averages);
+                Iterable<DataSnapshot> db =  dataSnapshot.getChildren();
+
+                for (DataSnapshot i : db){
+                    Log.i("datatest",i.getKey());
+                    String s = i.getKey()+"/0";
+                    Log.i("datatest3",s);
+
+                    Log.i("datatest2",i.getValue().toString());
+                    /*try {
+                        values.add(new Entry(Float.valueOf(i.getKey()),Float.valueOf(i.getValue().toString())));
+                    } catch (Exception e) {
+
+                    }*/
+
+
+                }
+                LineDataSet ldata = new LineDataSet(values,currency);
+                setSeriesSettings(ldata);
+                data.addDataSet(ldata);
+                graph.setData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        /*
         LineDataSet ldata = new LineDataSet(values,"randomData");
         setSeriesSettings(ldata);
         data.addDataSet(ldata);
 
         graph.setData(data);
-        setGraphSettings();
+        setGraphSettings();*/
         /*
         graph.removeAllSeries();
         LineGraphSeries<DataPoint> ser = new LineGraphSeries<>(data(map));
@@ -119,7 +168,7 @@ class Linegraph  {
 
         ser.setLineWidth(1f);
         ser.setCircleRadius(2);
-        setNewMaxMin(ser.getYMax(),ser.getYMin());
+
 
     }
     private void moveLegend(){
@@ -130,7 +179,7 @@ class Linegraph  {
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
         x.setTextSize(10f);
     }
-    private void setNewMaxMin(Float max, Float min){
+    private void setNewMaxMin(Float max, Float min,Float avrg){
         /*NumberFormat form = new DecimalFormat("#0.0");
         try {
             max=(Float)form.parse(form.format(max));
@@ -143,6 +192,8 @@ class Linegraph  {
         maxVal.setText(newMax);
         String newMin = "Min: "+ min;
         minVal.setText(newMin);
+        String newAvrg = "Average: " + avrg;
+        average.setText(newAvrg);
     }
         //Reasoning behind this is found at the bottom of mainactivity.
       /*  void setGraphSize(int newWidth,int newHeight) {
@@ -159,7 +210,10 @@ class Linegraph  {
         graph.setLayoutParams(params);
 
     }*/
+    /*
+    //TESTING PURPOSES DURING DEVELOPMENT
     private Entry RandomData(float x) {
           return new Entry(x,(float)(Math.random() * 5 + 8));
     }
+    */
 }
