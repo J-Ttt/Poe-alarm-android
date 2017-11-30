@@ -108,8 +108,8 @@ def saver(exit):
                         avrg += day[i][0]
                     avrg = avrg/24
                     month[0] = avrg
-                db.child["test"][item]["Day"].set(day)
-                db.child["test"][item]["Month"].set(month)
+                db.child("test").child(item).child("Day").set(day)
+                db.child("test").child(item).child("Month").set(month)
 
 
     print("saver dead")

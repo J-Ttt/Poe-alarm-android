@@ -2,6 +2,7 @@ import pyrebase
 import json
 import time
 import numpy as np
+import datetime
 
 def authData():
     data = open("auths.json")
@@ -19,11 +20,11 @@ def getAll(db):
     return base.val()
 
 def getday(league, item, db):
-    return db.child(league).child(item).child("Day").get()
+    return db.child(league).child(item).child("Day").get().val()
 
 
 def getMonth(league, item, db):
-    return db.child(league).child(item).child("Month").get()
+    return db.child(league).child(item).child("Month").get().val()
 
 def setData(db, childname, data):
     db.child(childname).set(data)
@@ -48,13 +49,14 @@ def avarages(data):
             else:
                 mean = 0
             if mean == 0:
-                avrg[league][item] = mean
+                avrg[league][item] = (mean, 0 )
             else:
                 final = [x for x in chaos if (x > mean - 1.5 * std)]
                 final = [x for x in final if (x < mean + 1.5 * std)]
                 avrg[league][item] = (np.mean(np.array(final)), len(final))
 
     return avrg
+
 
 if __name__ == "__main__":
     firebase = configure()
@@ -66,9 +68,79 @@ if __name__ == "__main__":
 
     avr = avarages(data)
     harb = avr["Harbinger"]
-    for item in harb:
-        for i in range(31):
-            db.child("test").child(item).child("Month").child(i).set((0, 0))
+    for item in avr["Harbinger"]:
+        day = getday("test", item, db)
+        month = getMonth("test", item, db)
+        if day == None or len(day) != 72:
+            day = {}
+            month = {}
+            for i in range(72):
+                day[i] = (0,0)
+            for a in range(31):
+                month[a] = (0,0)
+        for hour in range(71):
+            temp = day[hour + 1]
+            day[hour + 1] = day[hour]
+
+        day[0] = avr["Harbinger"][item]
+        now = datetime.datetime.now()
+        if now.hour == 1:
+            for dayM in range(30):
+                temp = month[dayM + 1]
+                month[dayM + 1] = month[dayM]
+            month[0] = avr["Harbinger"][item]
+        elif now.hour != 0:
+            avrg = 0
+            kpl = 0
+            for i in range(24):
+                avrg += day[i][0]
+                kpl += day[i][1]
+            avrg = avrg/now.hour
+            month[0] = (avrg, kpl)
+        else:
+            avrg = 0
+            for i in range(24):
+                avrg += day[i][0]
+            avrg = avrg/24
+            month[0] = avrg
+        dailyA = 0
+        monthlyA = 0
+        dayH = -float("Inf")
+        dayL = float("Inf")
+        monthH = -float("Inf")
+        monthL = float("Inf")
+        for i in day:
+            dailyA += day[i][0]
+            if day[i][0] < dayL:
+                dayL = day[i][0]
+
+            if day[i][0] > dayH:
+                dayH = day[i][0]
+
+        for i in month:
+            monthlyA += month[i][0]
+            if month[i][0] < monthL:
+                monthL = month[i][0]
+            if month[i][0] > monthH:
+                monthH = month[i][0]
+        dailyA = dailyA/72
+        monthlyA = monthlyA/31
+        day["avrg"] = dailyA
+        day["Highest"] = dayH
+        day["Lowest"] = dayL
+        month["avrg"] = monthlyA
+        month["Highest"] = monthH
+        month["Lowest"] = monthL
+
+        db.child("test").child(item).child("Day").set(day)
+        db.child("test").child(item).child("Month").set(month)
+
+    """for item in avr["Harbinger"]:
+        day = {}
+        month = {}
         for i in range(24):
-            db.child("test").child(item).child("Day").child(i).set((0, 0))
-        db.child("test").child(item).child("Year").child(time.strftime("%Y")).set((0, 0))
+            day[i] = (0,0)
+        for a in range(31):
+            month[a] = (0,0)
+        db.child("test").child(item).child("Day").set(day)
+        db.child("test").child(item).child("Month").set(month)"""
