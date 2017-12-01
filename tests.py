@@ -22,6 +22,9 @@ def getAll(db):
 def getday(league, item, db):
     return db.child(league).child(item).child("Day").get().val()
 
+def getYear(league, item, db):
+    year = db.child(league).child(item).child("Year").get()
+    return year.val()
 
 def getMonth(league, item, db):
     return db.child(league).child(item).child("Month").get().val()
@@ -68,7 +71,7 @@ if __name__ == "__main__":
 
     avr = avarages(data)
     harb = avr["Harbinger"]
-    for x in range(5):
+    for x in range(3):
         for item in avr["Harbinger"]:
             day = getday("test", item, db)
             month = getMonth("test", item, db)
@@ -89,10 +92,28 @@ if __name__ == "__main__":
             #print(day)
             day[0] = avr["Harbinger"][item]
             now = datetime.datetime.now()
-            if now.hour == 1:
+            if now.day == 1 and now.hour == 1:
+                year = getYear("test", item, db)
+                if year == None:
+                    year = {}
+                total = 0
+                if now.month == 1:
+                    lastDays = abs((datetime.date(now.year-1, 12, now.day) - datetime.date(now.year, now.month, now.day)).days)
+                else:
+                    lastDays = abs((datetime.date(now.year, now.month-1, now.day) - datetime.date(now.year, now.month, now.day)).days)
+                for dates in range(lastDays):
+                    total += month[str(dates)][0]
+                totalAvr = total/lastDays
+                print(lastDays, total)
+                monthMark = time.strftime("%m-%Y")
+                year[monthMark] = totalAvr
+                db.child("test").child(item).child("Year").set(year)
+            if True:
+                temp = month["0"]
                 for dayM in range(30):
-                    temp = month[dayM + 1]
-                    month[dayM + 1] = month[dayM]
+                    temp2 = month[str(dayM +1)]
+                    month[str(dayM + 1)] = temp
+                    temp = temp2
                 month[0] = avr["Harbinger"][item]
             elif now.hour != 0:
                 avrg = 0
