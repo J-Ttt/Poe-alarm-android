@@ -13,6 +13,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 /**
  * Created by dakerlun on 20/11/2017.
  */
@@ -24,6 +30,7 @@ public class TrackNewCurrency extends Activity {
     Button accept;
     SeekBar seekbar;
     double step = 0.1;
+    int scale = 1;
     MyApp mApp;
 
 
@@ -35,18 +42,33 @@ public class TrackNewCurrency extends Activity {
         Bundle extras = getIntent().getExtras();
         selectedCurrency=findViewById(R.id.rightDrawerSpinner);
         final String selCurr = extras.getString("selectedCurrency",getString(R.string.chaos_orb));
-        final int max = extras.getInt("seekBarMaxVal",100);
-        final int min = extras.getInt("seekBarMinVal",0);
-        final int currStatus = extras.getInt("currVal",0);
+        double max = extras.getDouble("seekBarMaxVal",100.0);
+        double min = extras.getDouble("seekBarMinVal",0.0);
+        double currStatus = extras.getDouble("currVal",10.0);
         selectedCurrency.setSelection(selectInitialCurrency(selCurr));
         ltorgt=findViewById(R.id.spinner);
         leagueSpinner = findViewById(R.id.leagueSpinner);
         leagueSpinner.setAdapter(mApp.getLeagueChoice());
-
+        if (max<1){
+            max=max*100;
+            min=min*100;
+            currStatus=currStatus*100;
+            scale=100;
+            step=1.0;
+        }else if (max<10) {
+            max = max * 10;
+            min = min * 10;
+            currStatus = currStatus*10;
+            scale = 10;
+            step=0.5;
+        }
+        final int newMin=(int)min;
+        final int newMax=(int)max;
+        final int newCurrStatus=(int)currStatus;
         seekbar=findViewById(R.id.seekBar);
-        int maxSeekBar = (int)((max-min)/step)+1;
+        int maxSeekBar = (int)((newMax-newMin)/step)+1;
         seekbar.setMax(maxSeekBar);
-        int progressSeekBar = (int)((currStatus-min)/step);
+        int progressSeekBar = (int)((newCurrStatus-newMin)/step);
         seekbar.setProgress(progressSeekBar);
 
 
@@ -80,7 +102,7 @@ public class TrackNewCurrency extends Activity {
         seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                String newVal = " " + (min + (i*step));
+                String newVal = " " + ((newMin + (i*step))/scale);
                 showval.setText(newVal);
             }
 
@@ -106,4 +128,31 @@ public class TrackNewCurrency extends Activity {
         }
         return index;
     }
+    /*
+    private void setSeekbarMaxMinVal(){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+        ref.child(String.valueOf(leagueSpinner.getSelectedItem())).
+                child(String.valueOf(selectedCurrency.getSelectedItem())).child("Day").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Float max = Float.valueOf(dataSnapshot.child("Highest").getValue().toString());
+                Float min = Float.valueOf(dataSnapshot.child("Lowest").getValue().toString());
+                max = max + (max * 0.2f);
+                min = min - (min * 0.2f);
+                if (max<100){
+
+                } else if (max<10){
+
+                } else if (max<1){
+
+                }
+                //seekbar.setMax();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }*/
 }

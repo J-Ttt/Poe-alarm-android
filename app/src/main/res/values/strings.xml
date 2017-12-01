@@ -7,10 +7,10 @@
     <string name="action_settings">Settings</string>
     <string name="chromatic_orb">Chromatic Orb</string>
     <string name="orb_of_alteration">Orb of Alteration</string>
-    <string name="jeweller_s_orb">Jeweller\'s orb</string>
-    <string name="blessed_orb">Blessed orb</string>
-    <string name="orb_of_chance">Orb of chance</string>
-    <string name="cartographer_s_chisel">Cartographer\'s chisel</string>
+    <string name="jeweller_s_orb">Jeweller\'s Orb</string>
+    <string name="blessed_orb">Blessed Orb</string>
+    <string name="orb_of_chance">Orb of Chance</string>
+    <string name="cartographer_s_chisel">Cartographer\'s Chisel</string>
     <string name="orb_of_fusing">Orb of Fusing</string>
     <string name="orb_of_alchemy">Orb of Alchemy</string>
     <string name="orb_of_scouring">Orb of Scouring</string>

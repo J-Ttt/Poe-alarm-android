@@ -27,6 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -150,6 +151,9 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Intent i = new Intent(MainActivity.this,TrackNewCurrency.class);
                 i.putExtra("selectedCurrency",currency);
+                i.putExtra("seekBarMaxVal",Double.valueOf(maxVal.getText().toString()));
+                i.putExtra("seekBarMinVal",Double.valueOf(minVal.getText().toString()));
+                i.putExtra("currVal",Double.valueOf(avrg.getText().toString()));
                 startActivityForResult(i,REQUEST_CODE_TRACK_NEW_CURRENCY);
             }
         });
@@ -178,10 +182,10 @@ public class MainActivity extends AppCompatActivity
         loadtestVideoAd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //loadRewardedVideoAd();
+                loadRewardedVideoAd();
                 //Map<Date,Double> newData = bgService.newRandomData();
                 //linegraph.update();
-                db.resetTables();
+                //db.resetTables();
             }
         });
         ArrayList<TrackedCurrency> trackedCurrencies = new ArrayList<>();
@@ -237,7 +241,8 @@ public class MainActivity extends AppCompatActivity
         currency = settings.getString(currCurrency,getString(R.string.chaos_orb));
         mApp.setLeagueChoice(spinnerAdapter);
         leagueChoice.setAdapter(spinnerAdapter);
-        //linegraph.update("Harbinger",currency,"Day");
+        //CurrencyIcon.setImageDrawable();
+        linegraph.update("Harbinger",currency,"Day");
     }
 
     @Override
