@@ -64,6 +64,7 @@ def avarages(data):
 if __name__ == "__main__":
     firebase = configure()
     db = firebase.database()
+    print("got db")
     date = time.strftime("%d-%m-%Y")
 
     with open("22-11-2017_16-56-33_poe.json", "r") as kohde:
@@ -74,6 +75,7 @@ if __name__ == "__main__":
     for x in range(3):
         for item in avr["Harbinger"]:
             day = getday("test", item, db)
+            
             month = getMonth("test", item, db)
             if day == None or len(day) != 75:
 

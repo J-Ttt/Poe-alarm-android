@@ -64,35 +64,14 @@ def getPrice(note):
                 return (int(numerator)/int(denominator), note[-1])
     return None
 
-def updateYear(db):
-    global values
-    now = datetime.datetime.now()
-    for league in values:
-        for item in values[league]:
-            month = getMonth(league, item, db)
-            year = getYear(league, item, db)
-            if year == None:
-                year = {}
-            total = 0
-            if now.month == 1:
-                lastDays = abs((datetime.date(now.year-1, 12, now.day) - datetime.date(now.year, now.month, now.day)).days)
-            else:
-                lastDays = abs((datetime.date(now.year, now.month-1, now.day) - datetime.date(now.year, now.month, now.day)).days)
-            for dates in range(lastDays):
-                if type(month[str(dates)]) != list:
-                    month[str(dates)] = (month[str(dates)], 0)
-
-                total += month[str(dates)][0]
-            totalAvr = total/lastDays
-            monthMark = time.strftime("%m-%Y")
-            year[monthMark] = totalAvr
-            db.child(league).child(item).child("Year").set(year)
-
 def saver(exit):
     print("Saver on")
     global values
     while not exit.is_set():
-        exit.wait(3600)
+        now = datetime.datetime.now()
+        future = now + datetime.timedelta(hours = 1)
+        future = future.replace(minute = 0, second = 0)
+        exit.wait((future-now).seconds)
         if not exit.is_set():
             date = time.strftime("%d-%m-%Y")
             timestamp = time.strftime("%H-%M-%S")
@@ -131,29 +110,25 @@ def saver(exit):
 
                     day[0] = avr[league][item]
                     if now.day == 1 and now.hour == 1:
-                            year = getYear(league, item, db)
-                            if year == None:
-                                year = {}
-                            total = 0
-                            if now.month == 1:
-                                lastDays = abs((datetime.date(now.year-1, 12, now.day) - datetime.date(now.year, now.month, now.day)).days)
-                            else:
-                                lastDays = abs((datetime.date(now.year, now.month-1, now.day) - datetime.date(now.year, now.month, now.day)).days)
-                            for dates in range(lastDays):
-                                if type(month[str(dates)]) != list:
-                                    month[str(dates)] = (month[str(dates)], 0)
-                                total += month[str(dates)][0]
-                            totalAvr = total/lastDays
-                            monthMark = time.strftime("%m-%Y")
-                            year[monthMark] = totalAvr
-                            db.child(league).child(item).child("Year").set(year)
+                        year = getYear(league, item, db)
+                        if year == None:
+                            year = {}
+                        total = 0
+                        if now.month == 1:
+                            lastDays = (datetime.date(now.year-1, 12, now.day) - datetime.date(now.year, now.month, now.day)).days
+                        else:
+                            lastDays = (datetime.date(now.year, now.month-1, now.day) - datetime.date(now.year, now.month, now.day)).days
+                        for day in range(lastDays):
+                            total += month[day][0]
+                        totalAvr = total/lastDays
+                        monthMark = time.strftime("%m-%Y")
+                        year[monthMark] = totalAvr
+                        db.child(league).child(item).child("Year").set(year)
 
                     if now.hour == 1:
-                        temp = month["0"]
                         for dayM in range(30):
-                            temp2 = month[str(dayM +1)]
-                            month[str(dayM + 1)] = temp
-                            temp = temp2
+                            temp = month[dayM + 1]
+                            month[dayM + 1] = month[dayM]
                         month[0] = avr[league][item]
                     elif now.hour != 0:
                         avrg = 0
@@ -165,12 +140,10 @@ def saver(exit):
                         month[0] = (avrg, kpl)
                     else:
                         avrg = 0
-                        kpl = 0
                         for i in range(24):
                             avrg += day[str(i)][0]
-                            kpl += day[str(i)][1]
                         avrg = avrg/24
-                        month[0] = (avrg, kpl)
+                        month[0] = avrg
                     dailyA = 0
                     monthlyA = 0
                     dayH = -float("Inf")
@@ -186,6 +159,8 @@ def saver(exit):
                             dayH = day[str(i)][0]
 
                     for i in range(31):
+                        if type(month[str(i)]) != list:
+                            month[str(i)] = (month[str(i)], 0)
                         monthlyA += month[str(i)][0]
                         if month[str(i)][0] < monthL:
                             monthL = month[str(i)][0]
@@ -276,7 +251,7 @@ converted = {
 lock = RLock()
 def main(exit):
     print("Reader on")
-    numb = "110246968-115636396-108476299-125029748-116875259"
+    numb = "110515891-115930933-108746942-125343022-117156579"
     id = "?id=" + numb
     sites = 0
     stashes = 0
@@ -406,19 +381,20 @@ def postData(data):
 if __name__ == "__main__":
 
     values = empty()
-    firebase = configure()
-    db = firebase.database()
-    updateYear(db)
-    """t = Thread(target=main,  args=(exit,))
+
+    t = Thread(target=main,  args=(exit,))
     t2 = Thread(target=saver,  args=(exit,))
     t.start()
     t2.start()
     while 1:
         try:
             time.sleep(1)
+            if not t.isAlive() or not t2.isAlive():
+                exit.set()
+                break
         except KeyboardInterrupt:
             exit.set()
-            break"""
+            break
     """data = json.load(open("22-11-2017_16-56-33_poe.json", "r"))
     data = avarages(data)
     with open("tulokset.json", 'w') as fp:
