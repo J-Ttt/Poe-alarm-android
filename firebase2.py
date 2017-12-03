@@ -108,7 +108,7 @@ def saver(exit):
                         day[str(hour +1)] = temp
                         temp = temp2
 
-                    day[0] = avr[league][item]
+                    day["0"] = avr[league][item]
                     if now.day == 1 and now.hour == 1:
                         year = getYear(league, item, db)
                         if year == None:
@@ -132,7 +132,7 @@ def saver(exit):
                             month[str(dayM + 1)] = temp
                             temp = temp2
 
-                        month[0] = avr[league][item]
+                        month["0"] = avr[league][item]
                     else:
                         avrg = 0
                         kpl = 0
@@ -140,7 +140,7 @@ def saver(exit):
                             avrg += day[str(i)][0]
                             kpl += day[str(i)][1]
                         avrg = avrg/24
-                        month[0] =  [avrg, kpl]
+                        month["0"] =  [avrg, kpl]
 
                     dailyA = 0
                     monthlyA = 0
@@ -250,7 +250,7 @@ converted = {
 lock = RLock()
 def main(exit):
     print("Reader on")
-    numb = "110529677-115945369-108761280-125359423-117172184"
+    numb = "110571731-115998231-108804767-125414092-117218459"
     id = "?id=" + numb
     sites = 0
     stashes = 0

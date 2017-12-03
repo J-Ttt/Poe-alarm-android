@@ -69,9 +69,10 @@ if __name__ == "__main__":
 
     with open("22-11-2017_16-56-33_poe.json", "r") as kohde:
         data = json.load(kohde)
-    mont = getday("Standard", "Orb of Alteration", db)
-    test = getAll(db)
-    print(type(mont["0"]))
+
+    tester = {"0": "Tämä on stringi", 0:"Tämä on integer"}
+    db.child("test").child("intString").set(tester)
+
     """
     avr = avarages(data)
     harb = avr["Harbinger"]
