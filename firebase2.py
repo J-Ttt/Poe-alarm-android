@@ -99,9 +99,9 @@ def saver(exit):
                         day = {}
                         month = {}
                         for i in range(72):
-                            day[str(i)] = (0,0)
+                            day[str(i)] = [0,0]
                         for a in range(31):
-                            month[str(a)] = (0,0)
+                            month[str(a)] = [0,0]
                     temp = day["0"]
                     for hour in range(71):
                         temp2 = day[str(hour +1)]
@@ -126,24 +126,22 @@ def saver(exit):
                         db.child(league).child(item).child("Year").set(year)
 
                     if now.hour == 1:
+                        temp = month["0"]
                         for dayM in range(30):
-                            temp = month[dayM + 1]
-                            month[dayM + 1] = month[dayM]
+                            temp2 = month[str(dayM +1)]
+                            month[str(dayM + 1)] = temp
+                            temp = temp2
+
                         month[0] = avr[league][item]
-                    elif now.hour != 0:
+                    else:
                         avrg = 0
                         kpl = 0
                         for i in range(24):
                             avrg += day[str(i)][0]
                             kpl += day[str(i)][1]
-                        avrg = avrg/now.hour
-                        month[0] = (avrg, kpl)
-                    else:
-                        avrg = 0
-                        for i in range(24):
-                            avrg += day[str(i)][0]
                         avrg = avrg/24
-                        month[0] = avrg
+                        month[0] =  [avrg, kpl]
+
                     dailyA = 0
                     monthlyA = 0
                     dayH = -float("Inf")
@@ -161,6 +159,7 @@ def saver(exit):
                     for i in range(31):
                         if type(month[str(i)]) != list:
                             month[str(i)] = (month[str(i)], 0)
+
                         monthlyA += month[str(i)][0]
                         if month[str(i)][0] < monthL:
                             monthL = month[str(i)][0]
@@ -251,7 +250,7 @@ converted = {
 lock = RLock()
 def main(exit):
     print("Reader on")
-    numb = "110515891-115930933-108746942-125343022-117156579"
+    numb = "110529677-115945369-108761280-125359423-117172184"
     id = "?id=" + numb
     sites = 0
     stashes = 0

@@ -69,13 +69,16 @@ if __name__ == "__main__":
 
     with open("22-11-2017_16-56-33_poe.json", "r") as kohde:
         data = json.load(kohde)
-
+    mont = getday("Standard", "Orb of Alteration", db)
+    test = getAll(db)
+    print(type(mont["0"]))
+    """
     avr = avarages(data)
     harb = avr["Harbinger"]
     for x in range(3):
         for item in avr["Harbinger"]:
             day = getday("test", item, db)
-            
+
             month = getMonth("test", item, db)
             if day == None or len(day) != 75:
 
@@ -160,15 +163,5 @@ if __name__ == "__main__":
             month["Highest"] = monthH
             month["Lowest"] = monthL
 
-            db.child("test").child(item).child("Day").set(day)
-            db.child("test").child(item).child("Month").set(month)
-
-        """for item in avr["Harbinger"]:
-            day = {}
-            month = {}
-            for i in range(24):
-                day[i] = (0,0)
-            for a in range(31):
-                month[a] = (0,0)
             db.child("test").child(item).child("Day").set(day)
             db.child("test").child(item).child("Month").set(month)"""
