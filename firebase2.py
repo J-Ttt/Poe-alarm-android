@@ -158,7 +158,7 @@ def saver(exit):
 
                     for i in range(31):
                         if type(month[str(i)]) != list:
-                            month[str(i)] = (month[str(i)], 0)
+                            month[str(i)] = [month[str(i)], 0]
 
                         monthlyA += month[str(i)][0]
                         if month[str(i)][0] < monthL:
@@ -250,7 +250,7 @@ converted = {
 lock = RLock()
 def main(exit):
     print("Reader on")
-    numb = "110571731-115998231-108804767-125414092-117218459"
+    numb = "110578980-116005648-108812318-125422000-117225149"
     id = "?id=" + numb
     sites = 0
     stashes = 0
@@ -368,9 +368,9 @@ def avarages(data):
             final = [x for x in chaos if (x > mean - 1.5 * std)]
             final = [x for x in final if (x < mean + 1.5 * std)]
             if len(final) != 0:
-                avrg[league][item] = (np.mean(np.array(final)), len(final))
+                avrg[league][item] = [np.mean(np.array(final)), len(final)]
             else:
-                avrg[league][item] = (mean, 0)
+                avrg[league][item] = [mean, 0]
 
     return avrg
 
