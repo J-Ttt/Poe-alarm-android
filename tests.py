@@ -70,10 +70,9 @@ if __name__ == "__main__":
     with open("22-11-2017_16-56-33_poe.json", "r") as kohde:
         data = json.load(kohde)
 
-    tester = {"0": "Tämä on stringi", 0:"Tämä on integer"}
-    db.child("test").child("intString").set(tester)
+    """tester = {"0": "Tämä on stringi", 0:"Tämä on integer"}
+    db.child("test").child("intString").set(tester)"""
 
-    """
     avr = avarages(data)
     harb = avr["Harbinger"]
     for x in range(3):
@@ -165,4 +164,4 @@ if __name__ == "__main__":
             month["Lowest"] = monthL
 
             db.child("test").child(item).child("Day").set(day)
-            db.child("test").child(item).child("Month").set(month)"""
+            db.child("test").child(item).child("Month").set(month)

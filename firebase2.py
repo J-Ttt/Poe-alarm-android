@@ -177,6 +177,7 @@ def saver(exit):
                     db.child(league).child(item).child("Day").set(day)
                     db.child(league).child(item).child("Month").set(month)
 
+            print("All leagues saved")
 
     print("saver dead")
 
@@ -225,7 +226,7 @@ def empty():
         "Master Cartographer's Sextant" : deepcopy(curs)
 
     }
-    leagues = ["Standard", "Hardcore", "SSF Harbinger HC", "Hardcore Harbinger", "SSF Harbinger", "Harbinger"]
+    leagues = getLeagues()
     finale = {}
     for name in leagues:
         finale[name] = deepcopy(everything)
@@ -248,13 +249,56 @@ converted = {
 
 }
 lock = RLock()
+
+def saveGame(number, pages, stashes):
+    try:
+        with open("stats.json", "r") as kohde:
+            stats = json.load(kohde)
+    except FileNotFoundError:
+        stats = {"id": None,
+                "leagues" : ["Standard", "Hardcore", "SSF Harbinger HC", "Hardcore Harbinger", "SSF Harbinger", "Harbinger"]}
+    stats["id"] = number
+    stats["pages"] = pages
+    stats["stashes"] = stashes
+    with open("stats.json", "w") as kohde:
+        json.dump(stats, kohde)
+
+def getId():
+    try:
+        with open("stats.json", "r") as kohde:
+            stats = json.load(kohde)
+    except FileNotFoundError:
+        stats = {"id": None,
+                "leagues" : ["Standard", "Hardcore", "SSF Harbinger HC", "Hardcore Harbinger", "SSF Harbinger", "Harbinger"]}
+    return stats["id"]
+
+def getStats():
+    try:
+        with open("stats.json", "r") as kohde:
+            stats = json.load(kohde)
+    except FileNotFoundError:
+        stats = {"id": None,
+                "leagues" : ["Standard", "Hardcore", "SSF Harbinger HC", "Hardcore Harbinger", "SSF Harbinger", "Harbinger"],
+                "pages": 0,
+                "stashes": 0}
+    return stats["pages"], stats["stashes"]
+
+def getLeagues():
+    try:
+        with open("stats.json", "r") as kohde:
+            stats = json.load(kohde)
+    except FileNotFoundError:
+        stats = {"id": None,
+                "leagues" : ["Standard", "Hardcore", "SSF Harbinger HC", "Hardcore Harbinger", "SSF Harbinger", "Harbinger"]}
+    return stats["leagues"]
+
 def main(exit):
     print("Reader on")
-    numb = "110578980-116005648-108812318-125422000-117225149"
+    numb = getId()
+    if numb == None:
+        numb = "111571306-116999236-109721299-126603946-118229397"
     id = "?id=" + numb
-    sites = 0
-    stashes = 0
-    timeR = 0
+    sites, stashes = getStats()
     timeS = time.time()
     global values
 
@@ -263,16 +307,18 @@ def main(exit):
 
     while not exit.is_set():
         try:
-            resp = requests.get("http://api.pathofexile.com/public-stash-tabs" + id)
+            data = requests.get("http://api.pathofexile.com/public-stash-tabs" + id).json()
             #print("got some")
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             print("ERROR OCCURED REQUESTING THE SITE, TRYING AGAIN IN 2 SECONDS")
             exit.wait(2)
             continue
-        data = json.loads(resp.text)
+        """if resp.text == None:
+            continue"""
+        #data = json.loads(resp.text)
         if not "next_change_id" in data.keys():
             print("HIT ROCK BOTTOM, TRYING AGAIN")
-            exit.wait(2)
+            exit.wait(10)
             continue
         stashes += len(data["stashes"])
         for stash in data["stashes"]:
@@ -302,6 +348,7 @@ def main(exit):
 
         if sites % 100 == 0:
             timeR = time.time() - timeS
+            saveGame(data["next_change_id"], sites, stashes)
             for i in values:
                 print("{}:".format(i))
                 for item in values[i]:
@@ -312,7 +359,7 @@ def main(exit):
     print("reader dead")
 
 def findleague(exit):
-    numb = "109116329-114424267-107372105-123736579-115715272"
+    numb = "111571306-116999236-109721299-126603946-118229397"
     id = "?id=" + numb
     sites = 0
     stashes = 0
@@ -380,7 +427,6 @@ def postData(data):
 if __name__ == "__main__":
 
     values = empty()
-
     t = Thread(target=main,  args=(exit,))
     t2 = Thread(target=saver,  args=(exit,))
     t.start()
