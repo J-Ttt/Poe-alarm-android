@@ -307,11 +307,18 @@ def main(exit):
 
     while not exit.is_set():
         try:
-            data = requests.get("http://api.pathofexile.com/public-stash-tabs" + id).json()
+            resp = requests.get("http://api.pathofexile.com/public-stash-tabs" + id)
+            if resp.status_code != 200:
+                print(resp.status_code)
+                exit.wait(10)
+                continue
+            else:
+                data = resp.json()
+
             #print("got some")
         except requests.exceptions.RequestException as e:  # This is the correct syntax
-            print("ERROR OCCURED REQUESTING THE SITE, TRYING AGAIN IN 2 SECONDS")
-            exit.wait(2)
+            print("ERROR OCCURED REQUESTING THE SITE, TRYING AGAIN IN 10 SECONDS")
+            exit.wait(10)
             continue
         """if resp.text == None:
             continue"""
@@ -356,6 +363,7 @@ def main(exit):
             print(data["next_change_id"])
             print("Stashes {}".format(len(data["stashes"])))
             print("Pages visited {}\nStashes mined: {}\nTime run: {}\n".format(sites, stashes, timeR))
+        exit.wait(1)
     print("reader dead")
 
 def findleague(exit):
