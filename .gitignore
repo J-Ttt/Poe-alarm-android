@@ -49,6 +49,8 @@ captures/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+Poe-alarm-108ef38e509e.json
+auths.json
 
 # Freeline
 freeline.py

@@ -28,6 +28,9 @@
         <service
             android:name=".BackgroundService"
             android:exported="true"/>
+        <service
+            android:name=".NotifierService"
+            android:enabled="true" />
     </application>
 
 </manifest>

@@ -1,6 +1,8 @@
 package com.feilz.poe_alarm;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -48,6 +50,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -79,6 +82,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar =  findViewById(R.id.toolbar);
@@ -211,6 +215,23 @@ public class MainActivity extends AppCompatActivity
         adapter = new TrackedCurrencyAdapter(this,trackedCurrencies);
         lv = findViewById(R.id.listView2);
         lv.setAdapter(adapter);
+
+        //startService(new Intent(this, NotifierService.class));   // Sends notification on startup
+
+        //start service and set it to repeat once every hour at xx:10:00
+
+        Calendar startTime = Calendar.getInstance();
+        startTime.set(Calendar.MINUTE, 10);
+        startTime.set(Calendar.SECOND, 0);
+        Log.d("TIME", String.valueOf(startTime.getTime()));
+        AlarmManager alarm = (AlarmManager)getSystemService(ALARM_SERVICE);
+        alarm.setRepeating(
+                alarm.RTC_WAKEUP,
+                startTime.getTimeInMillis() + (1000 * 60 * 60),
+                AlarmManager.INTERVAL_HOUR,
+                PendingIntent.getService(this, 0, new Intent(this, NotifierService.class), 0)
+        );
+
     }
 
     public void addToAlarmList(TrackedCurrency tc){
