@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://C:\Users\Joonas\Documents\ohjelmat\java\Poe-alarm-android\Poe-alarm.iml" filepath="C:\Users\Joonas\Documents\ohjelmat\java\Poe-alarm-android\Poe-alarm.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Poe-alarm-android.iml" filepath="$PROJECT_DIR$/Poe-alarm-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Poe-alarm.iml" filepath="$PROJECT_DIR$/Poe-alarm.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
